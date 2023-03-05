@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: get project original version
+        uses: ./.github/actions/project-version
+        id: project_version_original
+
+      - name: set project version
+        id: project_version
+        run: echo "version=${{ steps.project_version_original.outputs.version }}-alpha.build-$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      # First ensure code passes all checks (linters, tests, etc.)
+      - name: Build for local architecture (launching linters and tests)
+        run: delivery/pipelines/build.sh
+
+      # Then ensure code can be built for all architectures (like a the release pipeline does)
+      - name: Build and publish
+        uses: ./.github/actions/build-publish
+        with:
+          image-repo: sralloza/entertainment-source-manager-test
+          image-tag: ${{ steps.project_version.outputs.version }}
+          dockerhub-delete: true
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}

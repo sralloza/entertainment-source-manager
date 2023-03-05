@@ -1,0 +1,47 @@
+[
+  {
+    "source_name": "Source 0",
+    "chapter_id": "0x00",
+    "released_date": "2010-01-01",
+    "platform": "nginx",
+    "source": {
+      "provider": "TheTVDB",
+      "inputs": {
+        "source_name": "Source 0",
+        "source_encoded_name": "source-0",
+        "todoist_project_id": "project-0",
+        "todoist_section_id": null
+      }
+    }
+  },
+  {
+    "source_name": "Source 1",
+    "chapter_id": "1x01",
+    "released_date": "2019-01-01",
+    "platform": "nginx",
+    "source": {
+      "provider": "TheTVDB",
+      "inputs": {
+        "source_name": "Source 1",
+        "source_encoded_name": "source-1",
+        "todoist_project_id": "project-1",
+        "todoist_section_id": "section-1"
+      }
+    }
+  },
+  {
+    "source_name": "Source 1",
+    "chapter_id": "1x02",
+    "released_date": "2019-01-02",
+    "platform": "nginx",
+    "source": {
+      "provider": "TheTVDB",
+      "inputs": {
+        "source_name": "Source 1",
+        "source_encoded_name": "source-1",
+        "todoist_project_id": "project-1",
+        "todoist_section_id": "section-1"
+      }
+    }
+  }
+]

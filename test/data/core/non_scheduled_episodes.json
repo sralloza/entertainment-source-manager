@@ -1,0 +1,46 @@
+[
+  {
+    "source_name": "SpyXFamily",
+    "chapter_id": "1",
+    "chapter_url": "https://source-2.com/chapter-1",
+    "source": {
+      "provider": "SpyXFamily",
+      "inputs": {
+        "source_name": "SpyXFamily",
+        "source_encoded_name": "spy-x-family",
+        "todoist_project_id": "project-2",
+        "todoist_section_id": null
+      }
+    }
+  },
+  {
+    "source_name": "Source 3",
+    "chapter_id": "1",
+    "chapter_url": "https://source-3.com/chapter-1",
+    "source": {
+      "provider": "InManga",
+      "inputs": {
+        "source_name": "Source 3",
+        "source_encoded_name": "source-3",
+        "first_chapter_uuid": "ea8cb490-6e50-4187-a594-032f4b59be63",
+        "todoist_project_id": "project-3",
+        "todoist_section_id": "section-3"
+      }
+    }
+  },
+  {
+    "source_name": "Source 3",
+    "chapter_id": "2",
+    "chapter_url": "https://source-3.com/chapter-2",
+    "source": {
+      "provider": "InManga",
+      "inputs": {
+        "source_name": "Source 3",
+        "first_chapter_uuid": "ea8cb490-6e50-4187-a594-032f4b59be63",
+        "source_encoded_name": "source-3",
+        "todoist_project_id": "project-3",
+        "todoist_section_id": "section-3"
+      }
+    }
+  }
+]

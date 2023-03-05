@@ -1,0 +1,37 @@
+[
+  {
+    "provider": "TheTVDB",
+    "inputs": {
+      "source_name": "Source 0",
+      "source_encoded_name": "source-0",
+      "todoist_project_id": "project-0",
+      "todoist_section_id": null
+    }
+  },
+  {
+    "provider": "TheTVDB",
+    "inputs": {
+      "source_name": "Source 1",
+      "source_encoded_name": "source-1",
+      "todoist_project_id": "project-1",
+      "todoist_section_id": "section-1"
+    }
+  },
+  {
+    "provider": "SpyXFamily",
+    "inputs": {
+      "todoist_project_id": "project-2",
+      "todoist_section_id": null
+    }
+  },
+  {
+    "provider": "InManga",
+    "inputs": {
+      "source_name": "Source 3",
+      "source_encoded_name": "source-3",
+      "first_chapter_id": "ea8cb490-6e50-4187-a594-032f4b59be63",
+      "todoist_project_id": "project-3",
+      "todoist_section_id": "section-3"
+    }
+  }
+]

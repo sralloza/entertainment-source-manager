@@ -1,0 +1,74 @@
+[
+  {
+    "source_name": "Sherlock",
+    "chapter_id": "1x01",
+    "released_date": "2010-07-25",
+    "platform": "BBC One"
+  },
+  {
+    "source_name": "Sherlock",
+    "chapter_id": "1x02",
+    "released_date": "2010-08-01",
+    "platform": "BBC One"
+  },
+  {
+    "source_name": "Sherlock",
+    "chapter_id": "1x03",
+    "released_date": "2010-08-08",
+    "platform": "BBC One"
+  },
+  {
+    "source_name": "Sherlock",
+    "chapter_id": "2x01",
+    "released_date": "2012-01-01",
+    "platform": "BBC One"
+  },
+  {
+    "source_name": "Sherlock",
+    "chapter_id": "2x02",
+    "released_date": "2012-01-08",
+    "platform": "BBC One"
+  },
+  {
+    "source_name": "Sherlock",
+    "chapter_id": "2x03",
+    "released_date": "2012-01-15",
+    "platform": "BBC One"
+  },
+  {
+    "source_name": "Sherlock",
+    "chapter_id": "3x01",
+    "released_date": "2014-01-01",
+    "platform": "BBC One"
+  },
+  {
+    "source_name": "Sherlock",
+    "chapter_id": "3x02",
+    "released_date": "2014-01-05",
+    "platform": "BBC One"
+  },
+  {
+    "source_name": "Sherlock",
+    "chapter_id": "3x03",
+    "released_date": "2014-01-12",
+    "platform": "BBC One"
+  },
+  {
+    "source_name": "Sherlock",
+    "chapter_id": "4x01",
+    "released_date": "2017-01-01",
+    "platform": "BBC One"
+  },
+  {
+    "source_name": "Sherlock",
+    "chapter_id": "4x02",
+    "released_date": "2017-01-08",
+    "platform": "BBC One"
+  },
+  {
+    "source_name": "Sherlock",
+    "chapter_id": "4x03",
+    "released_date": "2017-01-15",
+    "platform": "BBC One"
+  }
+]

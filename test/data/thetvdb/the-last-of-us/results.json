@@ -1,0 +1,56 @@
+[
+  {
+    "source_name": "The Last of Us",
+    "chapter_id": "1x01",
+    "released_date": "2023-01-15",
+    "platform": "HBO"
+  },
+  {
+    "source_name": "The Last of Us",
+    "chapter_id": "1x02",
+    "released_date": "2023-01-22",
+    "platform": "HBO"
+  },
+  {
+    "source_name": "The Last of Us",
+    "chapter_id": "1x03",
+    "released_date": "2023-01-29",
+    "platform": "HBO"
+  },
+  {
+    "source_name": "The Last of Us",
+    "chapter_id": "1x04",
+    "released_date": "2023-02-05",
+    "platform": "HBO"
+  },
+  {
+    "source_name": "The Last of Us",
+    "chapter_id": "1x05",
+    "released_date": "2023-02-12",
+    "platform": "HBO"
+  },
+  {
+    "source_name": "The Last of Us",
+    "chapter_id": "1x06",
+    "released_date": "2023-02-19",
+    "platform": "HBO"
+  },
+  {
+    "source_name": "The Last of Us",
+    "chapter_id": "1x07",
+    "released_date": "2023-02-26",
+    "platform": "HBO"
+  },
+  {
+    "source_name": "The Last of Us",
+    "chapter_id": "1x08",
+    "released_date": "2023-03-05",
+    "platform": "HBO"
+  },
+  {
+    "source_name": "The Last of Us",
+    "chapter_id": "1x09",
+    "released_date": null,
+    "platform": "HBO"
+  }
+]

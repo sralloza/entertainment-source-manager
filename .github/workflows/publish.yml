@@ -1,0 +1,25 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: get project original version
+        uses: ./.github/actions/project-version
+        id: project_version
+
+      - name: Build and push
+        uses: ./.github/actions/build-publish
+        with:
+          image-repo: sralloza/entertainment-source-manager
+          image-tag: ${{ steps.project_version.outputs.version }}
+          dockerhub-delete: false
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
