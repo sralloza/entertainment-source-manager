@@ -25,30 +25,33 @@ S3_DATA = [
 class TestProcessNonScheduledEpisodes:
     @pytest.fixture(autouse=True)
     def mocks(self):
-        self.tr_sm = mock.patch("app.core.non_scheduled.TodoistRepository")
+        self.todoist_sm = mock.patch("app.core.non_scheduled.TodoistRepository")
+        self.telegram_sm = mock.patch("app.core.non_scheduled.TelegramRepository")
         self.s3r_sm = mock.patch("app.core.non_scheduled.S3Repository")
 
-        self.todoist_repo_m = self.tr_sm.start()
+        self.todoist_m = self.todoist_sm.start()
+        self.telegram_m = self.telegram_sm.start()
         self.s3_repo_m = self.s3r_sm.start()
 
         def get_episodes(source_name: str):
             return [x for x in S3_DATA if x.source_name == source_name]
 
-        self.todoist_repo_m.return_value = mock.AsyncMock()
+        self.todoist_m.return_value = mock.AsyncMock()
+        self.telegram_m.return_value = mock.AsyncMock()
         self.s3_repo_m.return_value = mock.AsyncMock()
         self.s3_repo_m.return_value.get_episodes.side_effect = get_episodes
 
         yield
 
-        self.tr_sm.stop()
+        self.todoist_sm.stop()
         self.s3r_sm.stop()
 
     @pytest.mark.asyncio
     async def test_ok(self):
         await process_non_scheduled_episodes(EPISODE_LIST)
 
-        self.todoist_repo_m.assert_called_once()
-        assert self.todoist_repo_m.return_value.list_tasks.call_count == 0
+        self.todoist_m.assert_called_once()
+        assert self.todoist_m.return_value.list_tasks.call_count == 0
 
         task_create = TaskCreate(
             content="[Source 3 2](https://source-3.com/chapter-2)",
@@ -57,9 +60,12 @@ class TestProcessNonScheduledEpisodes:
             section_id="section-3",
             due_date=date(2022, 1, 1),
         )
-        self.todoist_repo_m.return_value.create_task.assert_called_once_with(task_create)
-        self.todoist_repo_m.return_value.update_task.assert_not_called()
+        self.todoist_m.return_value.create_task.assert_called_once_with(task_create)
+        self.todoist_m.return_value.update_task.assert_not_called()
         self.s3_repo_m.return_value.update_episodes.assert_called_once_with("Source 3", ["1", "2"])
+        self.telegram_m.return_value.send_message.assert_called_once_with(
+            "New episode: [Source 3 2](https://source-3.com/chapter-2)"
+        )
 
     @pytest.mark.asyncio
     async def test_no_new_episodes(self):
@@ -67,8 +73,9 @@ class TestProcessNonScheduledEpisodes:
 
         await process_non_scheduled_episodes([])
 
-        self.todoist_repo_m.assert_called_once()
-        assert self.todoist_repo_m.return_value.list_tasks.call_count == 0
-        self.todoist_repo_m.return_value.create_task.assert_not_called()
-        self.todoist_repo_m.return_value.update_task.assert_not_called()
+        self.todoist_m.assert_called_once()
+        assert self.todoist_m.return_value.list_tasks.call_count == 0
+        self.todoist_m.return_value.create_task.assert_not_called()
+        self.todoist_m.return_value.update_task.assert_not_called()
         self.s3_repo_m.return_value.update_episodes.assert_not_called()
+        self.telegram_m.return_value.send_message.assert_not_called()

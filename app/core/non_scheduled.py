@@ -6,6 +6,7 @@ from app.logs import get_logger
 from app.models.episodes import NonScheduledEpisode, S3NonScheduledEpisode
 from app.models.todoist import TaskCreate
 from app.repositories.s3 import S3Repository
+from app.repositories.telegram import TelegramRepository
 from app.repositories.todoist import TodoistRepository
 
 logger = get_logger(__name__)
@@ -17,6 +18,7 @@ async def process_non_scheduled_episodes(episodes: list[NonScheduledEpisode]) ->
 
     s3_repo = S3Repository()
     todoist_repo = TodoistRepository()
+    telegram_repo = TelegramRepository()
 
     s3_episodes = await get_all_episodes(s3_repo, source_names)
     s3_episodes_map = {f"{x.source_name} {x.chapter_id}": x for x in s3_episodes}
@@ -27,7 +29,7 @@ async def process_non_scheduled_episodes(episodes: list[NonScheduledEpisode]) ->
         s3_episode = s3_episodes_map.get(task_title)
 
         if not s3_episode:
-            logger.info("Creating task for %r", task_title)
+            logger.info("Creating task and notification for %r", task_title)
             task_content = f"[{task_title}]({episode.chapter_url})"
             task_create = TaskCreate(
                 content=task_content,
@@ -38,6 +40,7 @@ async def process_non_scheduled_episodes(episodes: list[NonScheduledEpisode]) ->
             )
             new_episodes_source_names.add(episode.source_name)
             await todoist_repo.create_task(task_create)
+            await telegram_repo.send_message(f"New episode: {task_content}")
 
     if not new_episodes_source_names:
         logger.info("No new non scheduled episodes")
