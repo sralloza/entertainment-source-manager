@@ -29,20 +29,58 @@ def get_non_scheduled_episodes():
     return [NonScheduledEpisode(**x) for x in data]
 
 
-@pytest.mark.asyncio
-@mock.patch("app.main.get_sources")
-@mock.patch("app.main.process_source")
-@mock.patch("app.main.process_scheduled_episodes")
-@mock.patch("app.main.process_non_scheduled_episodes")
-async def test_inner_main(pnse_m, pse_m, ps_m, gs_m):
-    gs_m.return_value = get_sources()
+class TestInnerMain:
+    @pytest.fixture(autouse=True)
+    def mocks(self):
+        self.settings_sm = mock.patch("app.main.settings")
+        self.gs_sm = mock.patch("app.main.get_sources")
+        self.ps_sm = mock.patch("app.main.process_source")
+        self.pse_sm = mock.patch("app.main.process_scheduled_episodes")
+        self.pnse_sm = mock.patch("app.main.process_non_scheduled_episodes")
 
-    episodes = get_scheduled_episodes() + get_non_scheduled_episodes()
-    ps_m.side_effect = lambda x: [k for k in episodes if k.source_name == x.inputs.source_name]
+        self.settings_m = self.settings_sm.start()
+        self.gs_m = self.gs_sm.start()
+        self.ps_m = self.ps_sm.start()
+        self.pse_m = self.pse_sm.start()
+        self.pnse_m = self.pnse_sm.start()
 
-    await _main()
-    pse_m.assert_called_once_with(get_scheduled_episodes())
-    pnse_m.assert_called_once_with(get_non_scheduled_episodes())
+        yield
+
+        self.settings_sm.stop()
+        self.gs_sm.stop()
+        self.ps_sm.stop()
+        self.pse_sm.stop()
+        self.pnse_sm.stop()
+
+    @pytest.mark.parametrize("disabled_sources", ["Source 1,Source 3", list()])
+    @pytest.mark.asyncio
+    async def test_inner_main(self, disabled_sources):
+        real_disabled_sources = ["Source 1", "Source 3"]
+        self.gs_m.return_value = get_sources()
+        self.settings_m.disabled_sources = disabled_sources
+
+        scheduled_episodes = get_scheduled_episodes()
+        non_scheduled_episodes = get_non_scheduled_episodes()
+        episodes = scheduled_episodes + non_scheduled_episodes
+        self.ps_m.side_effect = lambda x: [
+            k for k in episodes if k.source_name == x.inputs.source_name
+        ]
+
+        await _main()
+
+        if disabled_sources:
+            exp_scheduled_episodes = [
+                x for x in scheduled_episodes if x.source_name not in real_disabled_sources
+            ]
+            exp_non_scheduled_episodes = [
+                x for x in non_scheduled_episodes if x.source_name not in real_disabled_sources
+            ]
+        else:
+            exp_scheduled_episodes = scheduled_episodes
+            exp_non_scheduled_episodes = non_scheduled_episodes
+
+        self.pse_m.assert_called_once_with(exp_scheduled_episodes)
+        self.pnse_m.assert_called_once_with(exp_non_scheduled_episodes)
 
 
 class TestMain:

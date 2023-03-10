@@ -10,6 +10,7 @@ class Settings(BaseModel):
     aws_bucket_name: str
     aws_region_name: str
     log_level: str = "DEBUG"
+    disabled_sources: list[str] = []
 
     @property
     def telegram_enabled(self) -> bool:

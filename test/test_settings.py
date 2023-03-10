@@ -88,9 +88,12 @@ def test_get_log_level(getenv_mock, env_value, expected):
 
 
 @pytest.mark.parametrize("tg_active", (True, False))
+@pytest.mark.parametrize("disabled_sources", (None, "One Piece,The Blacklist"))
 @mock.patch("app.settings.getenv")
-def test_get_settings_ok(getenv_mock, tg_active):
+def test_get_settings_ok(getenv_mock, tg_active, disabled_sources):
     def custom_getenv(key: str, default: str | None = None) -> str | None:
+        if key == "DISABLED_SOURCES":
+            return disabled_sources
         if key == "TELEGRAM_TOKEN" and tg_active is False:
             return None
         elif key == "TELEGRAM_CHAT_ID" and tg_active is False:
@@ -114,6 +117,10 @@ def test_get_settings_ok(getenv_mock, tg_active):
     assert settings.aws_bucket_name == "AWS_BUCKET_NAME"
     assert settings.aws_region_name == "AWS_REGION_NAME"
     assert settings.log_level == "DEBUG"
+    if disabled_sources is not None:
+        assert settings.disabled_sources == ["One Piece", "The Blacklist"]
+    else:
+        assert settings.disabled_sources == []
 
 
 @pytest.mark.parametrize("token,chat_id", [("token", None), (None, "chat_id")])
