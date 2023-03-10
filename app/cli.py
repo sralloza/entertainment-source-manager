@@ -18,7 +18,11 @@ def cli(ctx: click.Context) -> None:
 @cli.command()
 @click.argument("entire-source", type=str)
 def update_single_source(entire_source: str):
-    """Process all episodes from a source asuming they are new."""
+    """Process all episodes from a source asuming they are new.
+
+    This command only creates todoist tasks, it does not send telegram notifications
+    for non scheduled episodes.
+    """
     asyncio.run(main(entire_source))
 
 
