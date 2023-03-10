@@ -42,8 +42,9 @@ def get_log_level() -> str:
 
 
 def get_settings() -> Settings:
-    return Settings(
-        telegram_token=getenv_required("TELEGRAM_TOKEN"),
+    settings = Settings(
+        telegram_token=getenv("TELEGRAM_TOKEN"),
+        telegram_chat_id=getenv("TELEGRAM_CHAT_ID"),
         todoist_api_key=getenv_required("TODOIST_API_KEY"),
         aws_access_key_id=getenv_required("AWS_ACCESS_KEY_ID"),
         aws_secret_access_key=getenv_required("AWS_SECRET_ACCESS_KEY"),
@@ -51,6 +52,12 @@ def get_settings() -> Settings:
         aws_region_name=getenv_required("AWS_REGION_NAME"),
         log_level=get_log_level(),
     )
+
+    if not settings.valid_telegram_config:
+        msg = "Must set both TELEGRAM_TOKEN and TELEGRAM_CHAT_ID or neither."
+        raise ClickException(msg)
+
+    return settings
 
 
 def get_sources() -> list[Source]:

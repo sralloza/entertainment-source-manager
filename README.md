@@ -27,11 +27,14 @@ Configuration is done via environment variables
 - **_AWS_REGION_NAME_**: AWS region name where the bucket is.
 - **_AWS_SECRET_ACCESS_KEY_**: AWS secret access key.
 - **_SOURCES_**: base64 encoded JSON string with the sources to get the episodes from.
-- **_TELEGRAM_CHAT_ID_**: Telegram chat ID to send the notifications to.
-- **_TELEGRAM_TOKEN_**: Telegram bot token to send the notifications from.
 - **_TODOIST_API_KEY_**: Todoist token.
 
 ### Optional variables
+
+- **_TELEGRAM_CHAT_ID_**: Telegram chat ID to send the notifications to.
+- **_TELEGRAM_TOKEN_**: Telegram bot token to send the notifications from.
+
+Note: if only one of the two Telegram variables is set, the application will fail to start.
 
 ## Providers
 

@@ -33,6 +33,7 @@ function ensureEnvFileExists() {
     echo "AWS_REGION_NAME=aws-region-name" >> $envPath
     echo "AWS_SECRET_ACCESS_KEY=aws-secret-access-key" >> $envPath
     echo "TELEGRAM_TOKEN=telegram-token-test" >> $envPath
+    echo "TELEGRAM_CHAT_ID=telegram-chat-id" >> $envPath
     echo "TODOIST_API_KEY=todoist-api-key-test" >> $envPath
   fi
 }
