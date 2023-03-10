@@ -44,6 +44,8 @@ class TestInnerMain:
         self.pse_m = self.pse_sm.start()
         self.pnse_m = self.pnse_sm.start()
 
+        self.gs_m.return_value = get_sources()
+
         yield
 
         self.settings_sm.stop()
@@ -57,7 +59,6 @@ class TestInnerMain:
     @pytest.mark.asyncio
     async def test_inner_main(self, entire_source, disabled_sources):
         real_disabled_sources = ["Source 1", "Source 3"]
-        self.gs_m.return_value = get_sources()
         self.settings_m.disabled_sources = disabled_sources
 
         scheduled_episodes = get_scheduled_episodes()
@@ -91,6 +92,15 @@ class TestInnerMain:
         self.pse_m.assert_called_once_with(exp_scheduled_episodes, assume_new=assume_new)
         self.pnse_m.assert_called_once_with(exp_non_scheduled_episodes, assume_new=assume_new)
 
+    @pytest.mark.asyncio
+    async def test_invalid_entire_source(self):
+        err = (
+            "Invalid source name: invalid. Valid names are: "
+            "'Source 0', 'Source 1', 'SpyXFamily', 'Source 3'"
+        )
+        with pytest.raises(ClickException, match=err):
+            await _main("invalid")
+
 
 class TestMain:
     @pytest.fixture(autouse=True)
@@ -120,3 +130,11 @@ class TestMain:
 
         assert len(caplog.records) == 1
         assert "Internal error" in caplog.text
+
+    @pytest.mark.asyncio
+    async def test_click_exception(self, caplog):
+        self.inner_main_m.side_effect = ClickException("this is the original error")
+        with pytest.raises(ClickException, match="this is the original error"):
+            await main()
+
+        assert len(caplog.records) == 0
