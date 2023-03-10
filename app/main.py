@@ -23,6 +23,7 @@ async def get_episodes_from_source(
     logger.debug("Found %d episodes for %s", len(result), source.inputs.source_name)
     return result
 
+
 def filter_sources(sources: list[Source], entire_source: str) -> list[Source]:
     filtered_sources = [x for x in sources if x.inputs.source_name == entire_source]
     if not filtered_sources:
@@ -30,6 +31,7 @@ def filter_sources(sources: list[Source], entire_source: str) -> list[Source]:
         msg = f"Invalid source name: {entire_source}. Valid names are: {source_names}"
         raise ClickException(msg)
     return filtered_sources
+
 
 async def _main(entire_source: str | None) -> None:
     sources = get_sources()
