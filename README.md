@@ -33,9 +33,39 @@ Configuration is done via environment variables
 
 - **_TELEGRAM_CHAT_ID_**: Telegram chat ID to send the notifications to.
 - **_TELEGRAM_TOKEN_**: Telegram bot token to send the notifications from.
-- **_DISABLED_SOURCES_**: List of source names to disable. Example: `One Piece,The Blacklist`
+- **_DISABLED_SOURCES_**: List of source names to disable. Example: `One Piece,The Blacklist`. Note that when using the `update-single-source` command, this variable is ignored.
 
 Note: if only one of the two Telegram variables is set, the application will fail to start.
+
+## Usage
+
+The application has two modes:
+
+1. Find all new episodes and track them in Todoist.
+2. Find all episodes for a specific source and track them in Todoist.
+
+```shell
+# 1. Find all new episodes and track them in Todoist.
+docker run sralloza/entertainment-source-manager:$VERSION
+# 2. Find all episodes for a specific source and track them in Todoist.
+docker run sralloza/entertainment-source-manager:$VERSION update-single-source 'One Piece'
+```
+
+**Note: the update-single-source command (2) only creates todoist tasks, it does not send telegram notifications for non scheduled episodes.**
+
+### Logging
+
+The application is designed to be executed by a scheduler (e.g. cron) and it will log to stdout. All logs are in JSON format.
+
+Example:
+
+```text
+{"timestamp": "2023-03-10 21:11:32,775", "level": "DEBUG", "message": "Found 6 episodes for Star Wars: Tales of the Jedi", "version": "1.0.0", "thread": "MainThread"}
+{"timestamp": "2023-03-10 21:11:32,796", "level": "DEBUG", "message": "Found 18 episodes for Inside Job", "version": "1.0.0", "thread": "MainThread"}
+{"timestamp": "2023-03-10 21:11:32,803", "level": "DEBUG", "message": "Found 9 episodes for Marvel's What If", "version": "1.0.0", "thread": "MainThread"}
+```
+
+Note: the `version` field is the application version.
 
 ## Providers
 
