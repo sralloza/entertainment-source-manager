@@ -5,6 +5,7 @@
 ### Added
 
 - feat: send telegram notification when a new non scheduled episode is found
+- feat: skip some sources using the environment variable `DISABLED_SOURCES` (`DISABLED_SOURCES=source1,source2`)
 
 ## [1.0.0] - 2023-03-05
 

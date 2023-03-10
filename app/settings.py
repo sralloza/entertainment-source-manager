@@ -41,6 +41,13 @@ def get_log_level() -> str:
     return level
 
 
+def get_disabled_sources() -> list[str]:
+    disabled_sources = getenv("DISABLED_SOURCES")
+    if disabled_sources:
+        return disabled_sources.split(",")
+    return []
+
+
 def get_settings() -> Settings:
     settings = Settings(
         telegram_token=getenv("TELEGRAM_TOKEN"),
@@ -51,6 +58,7 @@ def get_settings() -> Settings:
         aws_bucket_name=getenv_required("AWS_BUCKET_NAME"),
         aws_region_name=getenv_required("AWS_REGION_NAME"),
         log_level=get_log_level(),
+        disabled_sources=get_disabled_sources(),
     )
 
     if not settings.valid_telegram_config:

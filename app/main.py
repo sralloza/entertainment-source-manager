@@ -8,7 +8,7 @@ from app.logs import get_logger
 from app.models.episodes import NonScheduledEpisode, ScheduledEpisode
 from app.models.source import Source
 from app.providers import process_source
-from app.settings import get_sources
+from app.settings import get_sources, settings
 
 logger = get_logger(__name__)
 
@@ -16,6 +16,9 @@ logger = get_logger(__name__)
 async def get_episodes_from_source(
     source: Source,
 ) -> list[ScheduledEpisode] | list[NonScheduledEpisode]:
+    if source.inputs.source_name in settings.disabled_sources:
+        logger.info("Source %s is disabled", source.inputs.source_name)
+        return []  # type: ignore[return-value]
     result = await process_source(source)
     logger.debug("Found %d episodes for %s", len(result), source.inputs.source_name)
     return result

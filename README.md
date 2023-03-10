@@ -33,6 +33,7 @@ Configuration is done via environment variables
 
 - **_TELEGRAM_CHAT_ID_**: Telegram chat ID to send the notifications to.
 - **_TELEGRAM_TOKEN_**: Telegram bot token to send the notifications from.
+- **_DISABLED_SOURCES_**: List of source names to disable. Example: `One Piece,The Blacklist`
 
 Note: if only one of the two Telegram variables is set, the application will fail to start.
 
