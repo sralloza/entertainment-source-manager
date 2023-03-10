@@ -53,8 +53,9 @@ class TestInnerMain:
         self.pnse_sm.stop()
 
     @pytest.mark.parametrize("disabled_sources", ["Source 1,Source 3", list()])
+    @pytest.mark.parametrize("entire_source", ["Source 1", None])
     @pytest.mark.asyncio
-    async def test_inner_main(self, disabled_sources):
+    async def test_inner_main(self, entire_source, disabled_sources):
         real_disabled_sources = ["Source 1", "Source 3"]
         self.gs_m.return_value = get_sources()
         self.settings_m.disabled_sources = disabled_sources
@@ -66,9 +67,16 @@ class TestInnerMain:
             k for k in episodes if k.source_name == x.inputs.source_name
         ]
 
-        await _main()
+        await _main(entire_source)
 
-        if disabled_sources:
+        if entire_source:
+            exp_scheduled_episodes = [
+                x for x in scheduled_episodes if x.source_name == entire_source
+            ]
+            exp_non_scheduled_episodes = [
+                x for x in non_scheduled_episodes if x.source_name == entire_source
+            ]
+        elif disabled_sources:
             exp_scheduled_episodes = [
                 x for x in scheduled_episodes if x.source_name not in real_disabled_sources
             ]
@@ -79,8 +87,9 @@ class TestInnerMain:
             exp_scheduled_episodes = scheduled_episodes
             exp_non_scheduled_episodes = non_scheduled_episodes
 
-        self.pse_m.assert_called_once_with(exp_scheduled_episodes)
-        self.pnse_m.assert_called_once_with(exp_non_scheduled_episodes)
+        assume_new = entire_source is not None
+        self.pse_m.assert_called_once_with(exp_scheduled_episodes, assume_new=assume_new)
+        self.pnse_m.assert_called_once_with(exp_non_scheduled_episodes, assume_new=assume_new)
 
 
 class TestMain:
@@ -92,9 +101,15 @@ class TestMain:
         self.inner_main_sm.stop()
 
     @pytest.mark.asyncio
-    async def test_ok(self, caplog):
+    async def test_without_entire_source(self, caplog):
         await main()
-        self.inner_main_m.assert_called_once_with()
+        self.inner_main_m.assert_called_once_with(None)
+        assert len(caplog.records) == 0
+
+    @pytest.mark.asyncio
+    async def test_with_entire_source(self, caplog):
+        await main("Source 1")
+        self.inner_main_m.assert_called_once_with("Source 1")
         assert len(caplog.records) == 0
 
     @pytest.mark.asyncio

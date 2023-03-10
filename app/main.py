@@ -14,9 +14,9 @@ logger = get_logger(__name__)
 
 
 async def get_episodes_from_source(
-    source: Source,
+    source: Source, disable_filter: bool
 ) -> list[ScheduledEpisode] | list[NonScheduledEpisode]:
-    if source.inputs.source_name in settings.disabled_sources:
+    if not disable_filter and source.inputs.source_name in settings.disabled_sources:
         logger.info("Source %s is disabled", source.inputs.source_name)
         return []  # type: ignore[return-value]
     result = await process_source(source)
@@ -37,7 +37,7 @@ async def _main(entire_source: str | None) -> None:
         sources = filter_sources(sources, entire_source)
 
     assume_new = entire_source is not None
-    tasks = [get_episodes_from_source(source) for source in sources]
+    tasks = [get_episodes_from_source(source, disable_filter=assume_new) for source in sources]
     episodes_nested = await asyncio.gather(*tasks)
     episodes = [item for sublist in episodes_nested for item in sublist]
 
