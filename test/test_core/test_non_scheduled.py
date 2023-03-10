@@ -71,11 +71,12 @@ class TestProcessNonScheduledEpisodes:
         else:
             self.todoist_m.return_value.create_task.assert_called_once_with(task_create)
             self.todoist_m.return_value.update_task.assert_not_called()
-            self.s3_repo_m.return_value.update_episodes.assert_called_once_with("Source 3", ["1", "2"])
+            self.s3_repo_m.return_value.update_episodes.assert_called_once_with(
+                "Source 3", ["1", "2"]
+            )
             self.telegram_m.return_value.send_message.assert_called_once_with(
-            "New episode: [Source 3 2](https://source-3.com/chapter-2)"
-        )
-
+                "New episode: [Source 3 2](https://source-3.com/chapter-2)"
+            )
 
     @pytest.mark.parametrize("assume_new", [True, False])
     @pytest.mark.asyncio
