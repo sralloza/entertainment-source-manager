@@ -25,5 +25,6 @@ COPY delivery/ /code/delivery/
 COPY pyproject.toml /code/
 
 ENV PYTHONPATH=/code
+ENV PYTHONUNBUFFERED=true
 
 ENTRYPOINT [ "/code/delivery/entrypoint.sh" ]

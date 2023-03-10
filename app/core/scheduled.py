@@ -9,10 +9,13 @@ from app.repositories.todoist import TodoistRepository
 logger = get_logger(__name__)
 
 
-async def process_scheduled_episodes(episodes: list[ScheduledEpisode]) -> None:
+async def process_scheduled_episodes(episodes: list[ScheduledEpisode], assume_new: bool) -> None:
     # We only care about episodes that will be released in the future (excluding today)
     today = date.today()
-    episodes = [x for x in episodes if x.released_date and x.released_date > today]
+    if assume_new:
+        episodes = [x for x in episodes if x.released_date]
+    else:
+        episodes = [x for x in episodes if x.released_date and x.released_date > today]
 
     project_ids = set(x.source.inputs.todoist_project_id for x in episodes)
 

@@ -12,7 +12,8 @@ function init() {
 }
 
 function run() {
-  python /code/app/cli.py
+  python /code/app/cli.py "$@"
 }
 
-source "$(dirname "$0")/base.inc"
+init
+run "$@"

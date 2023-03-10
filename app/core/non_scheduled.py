@@ -12,7 +12,9 @@ from app.repositories.todoist import TodoistRepository
 logger = get_logger(__name__)
 
 
-async def process_non_scheduled_episodes(episodes: list[NonScheduledEpisode]) -> None:
+async def process_non_scheduled_episodes(
+    episodes: list[NonScheduledEpisode], assume_new: bool
+) -> None:
     today = date.today()
     source_names = {x.source_name for x in episodes}
 
@@ -28,8 +30,8 @@ async def process_non_scheduled_episodes(episodes: list[NonScheduledEpisode]) ->
         task_title = f"{episode.source_name} {episode.chapter_id}"
         s3_episode = s3_episodes_map.get(task_title)
 
-        if not s3_episode:
-            logger.info("Creating task and notification for %r", task_title)
+        if not s3_episode or assume_new:
+            logger.info("Creating task and notification for %r (forced=%r)", task_title, assume_new)
             task_content = f"[{task_title}]({episode.chapter_url})"
             task_create = TaskCreate(
                 content=task_content,
@@ -40,7 +42,8 @@ async def process_non_scheduled_episodes(episodes: list[NonScheduledEpisode]) ->
             )
             new_episodes_source_names.add(episode.source_name)
             await todoist_repo.create_task(task_create)
-            await telegram_repo.send_message(f"New episode: {task_content}")
+            if not assume_new:
+                await telegram_repo.send_message(f"New episode: {task_content}")
 
     if not new_episodes_source_names:
         logger.info("No new non scheduled episodes")
