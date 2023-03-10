@@ -7,6 +7,7 @@ from click import ClickException
 
 from app.main import _main, main
 from app.models.episodes import NonScheduledEpisode, ScheduledEpisode
+from app.models.source import Source
 from app.settings import _parse_sources
 
 TEST_DATA_FOLDER = Path(__file__).parent / "data" / "main"
@@ -91,6 +92,32 @@ class TestInnerMain:
         assume_new = entire_source is not None
         self.pse_m.assert_called_once_with(exp_scheduled_episodes, assume_new=assume_new)
         self.pnse_m.assert_called_once_with(exp_non_scheduled_episodes, assume_new=assume_new)
+
+    @pytest.mark.asyncio
+    async def test_error_getting_episodes_from_source(self, caplog):
+        def process_source(source: Source):
+            source_name = source.inputs.source_name
+            if source_name == "Source 0":
+                raise Exception("Error")
+            return [k for k in episodes if k.source_name == source_name]
+
+        scheduled_episodes = get_scheduled_episodes()
+        non_scheduled_episodes = get_non_scheduled_episodes()
+        episodes = scheduled_episodes + non_scheduled_episodes
+        self.ps_m.side_effect = process_source
+
+        await _main(None)
+
+        exp_scheduled_episodes = [x for x in scheduled_episodes if x.source_name != "Source 0"]
+        self.pse_m.assert_called_once_with(exp_scheduled_episodes, assume_new=False)
+        self.pnse_m.assert_called_once_with(non_scheduled_episodes, assume_new=False)
+
+        log_records = [x for x in caplog.records if x.levelname == "ERROR"]
+        assert len(log_records) == 1
+        log_record = log_records[0]
+        assert log_record.exc_info[0] == Exception
+        log_message = log_record.msg % log_record.args
+        assert log_message == "Error while processing source 'Source 0'"
 
     @pytest.mark.asyncio
     async def test_invalid_entire_source(self):

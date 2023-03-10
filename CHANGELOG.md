@@ -8,6 +8,10 @@
 - feat: skip some sources using the environment variable `DISABLED_SOURCES` (`DISABLED_SOURCES=source1,source2`)
 - feat: add command `update-single-source` to update a single source assuming all the episodes are new
 
+### Fixed
+
+- fix: do not stop execution when a provider fails to fetch its episodes
+
 ## [1.0.0] - 2023-03-05
 
 ### Added
