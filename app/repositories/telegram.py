@@ -7,9 +7,9 @@ class TelegramRepository(BaseRepository):
         super().__init__(api_base_url="https://api.telegram.org")
         pass
 
-    async def send_message(self, chat_id: str, message: str) -> None:
+    async def send_message(self, message: str) -> None:
         params = {
-            "chat_id": chat_id,
+            "chat_id": settings.telegram_chat_id,
             "text": message,
             "parse_mode": "MarkdownV2",
             "disable_web_page_preview": "true",

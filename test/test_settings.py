@@ -88,16 +88,33 @@ def test_get_log_level(getenv_mock, env_value, expected):
 
 
 @mock.patch("app.settings.getenv_required")
-def test_get_settings(getenv_req_mock):
+def test_get_settings_ok(getenv_req_mock):
     getenv_req_mock.side_effect = lambda x: x
     settings = get_settings()
     assert settings.telegram_token == "TELEGRAM_TOKEN"
+    assert settings.telegram_chat_id == "TELEGRAM_CHAT_ID"
     assert settings.todoist_api_key == "TODOIST_API_KEY"
     assert settings.aws_access_key_id == "AWS_ACCESS_KEY_ID"
     assert settings.aws_secret_access_key == "AWS_SECRET_ACCESS_KEY"
     assert settings.aws_bucket_name == "AWS_BUCKET_NAME"
     assert settings.aws_region_name == "AWS_REGION_NAME"
     assert settings.log_level == "DEBUG"
+
+
+@pytest.mark.parametrize("token,chat_id", [("token", None), (None, "chat_id")])
+@mock.patch("app.settings.getenv_required")
+def test_get_settings_fail(getenv_req_mock, token, chat_id):
+    env_vars = {"TELEGRAM_TOKEN": token, "TELEGRAM_CHAT_ID": chat_id}
+
+    def getenv_custom(key: str):
+        if key in env_vars:
+            return env_vars[key]
+        return key
+
+    getenv_req_mock.side_effect = getenv_custom
+    err = "Must set both TELEGRAM_TOKEN and TELEGRAM_CHAT_ID or neither."
+    with pytest.raises(ClickException, match=err):
+        get_settings()
 
 
 class TestGetSources:
