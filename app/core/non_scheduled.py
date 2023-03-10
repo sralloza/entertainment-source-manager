@@ -12,7 +12,7 @@ from app.repositories.todoist import TodoistRepository
 logger = get_logger(__name__)
 
 
-async def process_non_scheduled_episodes(episodes: list[NonScheduledEpisode]) -> None:
+async def process_non_scheduled_episodes(episodes: list[NonScheduledEpisode], assume_new: bool) -> None:
     today = date.today()
     source_names = {x.source_name for x in episodes}
 

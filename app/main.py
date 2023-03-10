@@ -23,9 +23,20 @@ async def get_episodes_from_source(
     logger.debug("Found %d episodes for %s", len(result), source.inputs.source_name)
     return result
 
+def filter_sources(sources: list[Source], entire_source: str) -> list[Source]:
+    filtered_sources = [x for x in sources if x.inputs.source_name == entire_source]
+    if not filtered_sources:
+        source_names = ", ".join(repr(x.inputs.source_name) for x in sources)
+        msg = f"Invalid source name: {entire_source}. Valid names are: {source_names}"
+        raise ClickException(msg)
+    return filtered_sources
 
-async def _main() -> None:
+async def _main(entire_source: str | None) -> None:
     sources = get_sources()
+    if entire_source is not None:
+        sources = filter_sources(sources, entire_source)
+
+    assume_new = entire_source is not None
     tasks = [get_episodes_from_source(source) for source in sources]
     episodes_nested = await asyncio.gather(*tasks)
     episodes = [item for sublist in episodes_nested for item in sublist]
@@ -36,13 +47,15 @@ async def _main() -> None:
     logger.info("Found %d scheduled episodes", len(scheduled_eps))
     logger.info("Found %d non-scheduled episodes", len(non_scheduled_eps))
 
-    await process_scheduled_episodes(scheduled_eps)
-    await process_non_scheduled_episodes(non_scheduled_eps)
+    await process_scheduled_episodes(scheduled_eps, assume_new=assume_new)
+    await process_non_scheduled_episodes(non_scheduled_eps, assume_new=assume_new)
 
 
-async def main() -> None:
+async def main(entire_source: str | None = None) -> None:
     try:
-        await _main()
+        await _main(entire_source)
     except Exception as e:
-        logger.exception("Internal error", stack_info=True)
-        raise ClickException("Internal error: " + str(e))
+        if not isinstance(e, ClickException):
+            logger.exception("Internal error", stack_info=True)
+            raise ClickException("Internal error: " + str(e))
+        raise

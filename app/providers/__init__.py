@@ -15,9 +15,9 @@ spyxfamily_provider = SpyXFamilyProvider()
 async def process_source(source: Source) -> _LS | _LNS:
     if source.provider == "InManga":
         return await inmanga_provider.process_source(source)
-    elif source.provider == "TheTVDB":
-        return await thetvdb_provider.process_source(source)
     elif source.provider == "SpyXFamily":
         return await spyxfamily_provider.process_source(source)
+    elif source.provider == "TheTVDB":
+        return await thetvdb_provider.process_source(source)
     else:
         raise ValueError(f"Invalid provider: {source.provider}")
