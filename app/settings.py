@@ -43,8 +43,8 @@ def get_log_level() -> str:
 
 def get_settings() -> Settings:
     settings = Settings(
-        telegram_token=getenv_required("TELEGRAM_TOKEN"),
-        telegram_chat_id=getenv_required("TELEGRAM_CHAT_ID"),
+        telegram_token=getenv("TELEGRAM_TOKEN"),
+        telegram_chat_id=getenv("TELEGRAM_CHAT_ID"),
         todoist_api_key=getenv_required("TODOIST_API_KEY"),
         aws_access_key_id=getenv_required("AWS_ACCESS_KEY_ID"),
         aws_secret_access_key=getenv_required("AWS_SECRET_ACCESS_KEY"),

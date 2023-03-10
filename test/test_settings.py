@@ -87,12 +87,27 @@ def test_get_log_level(getenv_mock, env_value, expected):
         assert get_log_level() == expected
 
 
-@mock.patch("app.settings.getenv_required")
-def test_get_settings_ok(getenv_req_mock):
-    getenv_req_mock.side_effect = lambda x: x
+@pytest.mark.parametrize("tg_active", (True, False))
+@mock.patch("app.settings.getenv")
+def test_get_settings_ok(getenv_mock, tg_active):
+    def custom_getenv(key: str, default: str | None = None) -> str | None:
+        if key == "TELEGRAM_TOKEN" and tg_active is False:
+            return None
+        elif key == "TELEGRAM_CHAT_ID" and tg_active is False:
+            return None
+        return default or key
+
+    getenv_mock.side_effect = custom_getenv
     settings = get_settings()
-    assert settings.telegram_token == "TELEGRAM_TOKEN"
-    assert settings.telegram_chat_id == "TELEGRAM_CHAT_ID"
+    if tg_active:
+        assert settings.telegram_token == "TELEGRAM_TOKEN"
+        assert settings.telegram_chat_id == "TELEGRAM_CHAT_ID"
+        assert settings.telegram_enabled is True
+    else:
+        assert settings.telegram_token is None
+        assert settings.telegram_chat_id is None
+        assert settings.telegram_enabled is False
+
     assert settings.todoist_api_key == "TODOIST_API_KEY"
     assert settings.aws_access_key_id == "AWS_ACCESS_KEY_ID"
     assert settings.aws_secret_access_key == "AWS_SECRET_ACCESS_KEY"
@@ -102,16 +117,16 @@ def test_get_settings_ok(getenv_req_mock):
 
 
 @pytest.mark.parametrize("token,chat_id", [("token", None), (None, "chat_id")])
-@mock.patch("app.settings.getenv_required")
-def test_get_settings_fail(getenv_req_mock, token, chat_id):
+@mock.patch("app.settings.getenv")
+def test_get_settings_fail(getenv_mock, token, chat_id):
     env_vars = {"TELEGRAM_TOKEN": token, "TELEGRAM_CHAT_ID": chat_id}
 
-    def getenv_custom(key: str):
+    def getenv_custom(key: str, default: str | None = None) -> str | None:
         if key in env_vars:
             return env_vars[key]
-        return key
+        return default or key
 
-    getenv_req_mock.side_effect = getenv_custom
+    getenv_mock.side_effect = getenv_custom
     err = "Must set both TELEGRAM_TOKEN and TELEGRAM_CHAT_ID or neither."
     with pytest.raises(ClickException, match=err):
         get_settings()

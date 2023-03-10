@@ -8,6 +8,8 @@ class TelegramRepository(BaseRepository):
         pass
 
     async def send_message(self, message: str) -> None:
+        if not settings.telegram_enabled:
+            return
         params = {
             "chat_id": settings.telegram_chat_id,
             "text": message,

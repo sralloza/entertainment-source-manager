@@ -12,6 +12,11 @@ class Settings(BaseModel):
     log_level: str = "DEBUG"
 
     @property
+    def telegram_enabled(self) -> bool:
+        arr = (self.telegram_token, self.telegram_chat_id)
+        return None not in arr
+
+    @property
     def valid_telegram_config(self) -> bool:
         arr = (self.telegram_token, self.telegram_chat_id)
         return arr.count(None) != 1
