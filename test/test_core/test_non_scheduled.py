@@ -46,9 +46,10 @@ class TestProcessNonScheduledEpisodes:
         self.todoist_sm.stop()
         self.s3r_sm.stop()
 
+    @pytest.mark.parametrize("assume_new", [True, False])
     @pytest.mark.asyncio
-    async def test_ok(self):
-        await process_non_scheduled_episodes(EPISODE_LIST)
+    async def test_ok(self, assume_new):
+        await process_non_scheduled_episodes(EPISODE_LIST, assume_new)
 
         self.todoist_m.assert_called_once()
         assert self.todoist_m.return_value.list_tasks.call_count == 0
@@ -60,18 +61,28 @@ class TestProcessNonScheduledEpisodes:
             section_id="section-3",
             due_date=date(2022, 1, 1),
         )
-        self.todoist_m.return_value.create_task.assert_called_once_with(task_create)
-        self.todoist_m.return_value.update_task.assert_not_called()
-        self.s3_repo_m.return_value.update_episodes.assert_called_once_with("Source 3", ["1", "2"])
-        self.telegram_m.return_value.send_message.assert_called_once_with(
+        if assume_new:
+            assert self.todoist_m.return_value.create_task.call_count == 3
+            self.todoist_m.return_value.update_task.assert_not_called()
+            self.telegram_m.return_value.send_message.assert_not_called()
+            assert self.s3_repo_m.return_value.update_episodes.call_count == 2
+            self.s3_repo_m.return_value.update_episodes.assert_any_call("SpyXFamily", ["1"])
+            self.s3_repo_m.return_value.update_episodes.assert_any_call("Source 3", ["1", "2"])
+        else:
+            self.todoist_m.return_value.create_task.assert_called_once_with(task_create)
+            self.todoist_m.return_value.update_task.assert_not_called()
+            self.s3_repo_m.return_value.update_episodes.assert_called_once_with("Source 3", ["1", "2"])
+            self.telegram_m.return_value.send_message.assert_called_once_with(
             "New episode: [Source 3 2](https://source-3.com/chapter-2)"
         )
 
+
+    @pytest.mark.parametrize("assume_new", [True, False])
     @pytest.mark.asyncio
-    async def test_no_new_episodes(self):
+    async def test_no_new_episodes(self, assume_new):
         self.s3_repo_m.return_value.get_episodes.return_value = []
 
-        await process_non_scheduled_episodes([])
+        await process_non_scheduled_episodes([], assume_new)
 
         self.todoist_m.assert_called_once()
         assert self.todoist_m.return_value.list_tasks.call_count == 0
