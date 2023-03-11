@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "entertainment-source-manager"
-version = "1.0.0"
+version = "1.1.0"
 description = ""
 authors = ["Diego Alloza González <diego.allozagonzalez@telefonica.com>"]
 readme = "README.md"
