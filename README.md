@@ -53,6 +53,12 @@ docker run sralloza/entertainment-source-manager:$VERSION update-single-source '
 
 **Note: the update-single-source command (2) only creates todoist tasks, it does not send telegram notifications for non scheduled episodes.**
 
+## Other useful commands
+
+- `print`: shows the current sources configuration and source names.
+
+Note: this documentation may be outdated. Please check the help command for the latest information.
+
 ### Logging
 
 The application is designed to be executed by a scheduler (e.g. cron) and it will log to stdout. All logs are in JSON format.
