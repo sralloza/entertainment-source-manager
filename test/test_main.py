@@ -57,8 +57,9 @@ class TestInnerMain:
 
     @pytest.mark.parametrize("disabled_sources", ["Source 1,Source 3", list()])
     @pytest.mark.parametrize("entire_source", ["Source 1", None])
+    @pytest.mark.parametrize("dry_run", [True, False])
     @pytest.mark.asyncio
-    async def test_inner_main(self, entire_source, disabled_sources):
+    async def test_inner_main(self, entire_source, disabled_sources, dry_run):
         real_disabled_sources = ["Source 1", "Source 3"]
         self.settings_m.disabled_sources = disabled_sources
 
@@ -69,7 +70,7 @@ class TestInnerMain:
             k for k in episodes if k.source_name == x.inputs.source_name
         ]
 
-        await _main(entire_source)
+        await _main(entire_source, dry_run)
 
         if entire_source:
             exp_scheduled_episodes = [
@@ -90,11 +91,16 @@ class TestInnerMain:
             exp_non_scheduled_episodes = non_scheduled_episodes
 
         assume_new = entire_source is not None
-        self.pse_m.assert_called_once_with(exp_scheduled_episodes, assume_new=assume_new)
-        self.pnse_m.assert_called_once_with(exp_non_scheduled_episodes, assume_new=assume_new)
+        self.pse_m.assert_called_once_with(
+            exp_scheduled_episodes, assume_new=assume_new, dry_run=dry_run
+        )
+        self.pnse_m.assert_called_once_with(
+            exp_non_scheduled_episodes, assume_new=assume_new, dry_run=dry_run
+        )
 
     @pytest.mark.asyncio
-    async def test_error_getting_episodes_from_source(self, caplog):
+    @pytest.mark.parametrize("dry_run", [True, False])
+    async def test_error_getting_episodes_from_source(self, caplog, dry_run):
         def process_source(source: Source):
             source_name = source.inputs.source_name
             if source_name == "Source 0":
@@ -106,11 +112,15 @@ class TestInnerMain:
         episodes = scheduled_episodes + non_scheduled_episodes
         self.ps_m.side_effect = process_source
 
-        await _main(None)
+        await _main(None, dry_run)
 
         exp_scheduled_episodes = [x for x in scheduled_episodes if x.source_name != "Source 0"]
-        self.pse_m.assert_called_once_with(exp_scheduled_episodes, assume_new=False)
-        self.pnse_m.assert_called_once_with(non_scheduled_episodes, assume_new=False)
+        self.pse_m.assert_called_once_with(
+            exp_scheduled_episodes, assume_new=False, dry_run=dry_run
+        )
+        self.pnse_m.assert_called_once_with(
+            non_scheduled_episodes, assume_new=False, dry_run=dry_run
+        )
 
         log_records = [x for x in caplog.records if x.levelname == "ERROR"]
         assert len(log_records) == 1
@@ -122,11 +132,11 @@ class TestInnerMain:
     @pytest.mark.asyncio
     async def test_invalid_entire_source(self):
         err = (
-            "Invalid source name: invalid. Valid names are: "
+            "Invalid source name: 'invalid'. Valid names are: "
             "'Source 0', 'Source 1', 'SpyXFamily', 'Source 3'"
         )
         with pytest.raises(ClickException, match=err):
-            await _main("invalid")
+            await _main("invalid", False)
 
 
 class TestMain:
@@ -140,13 +150,14 @@ class TestMain:
     @pytest.mark.asyncio
     async def test_without_entire_source(self, caplog):
         await main()
-        self.inner_main_m.assert_called_once_with(None)
+        self.inner_main_m.assert_called_once_with(None, False)
         assert len(caplog.records) == 0
 
     @pytest.mark.asyncio
-    async def test_with_entire_source(self, caplog):
-        await main("Source 1")
-        self.inner_main_m.assert_called_once_with("Source 1")
+    @pytest.mark.parametrize("dry_run", [True, False])
+    async def test_with_entire_source(self, caplog, dry_run):
+        await main(entire_source="Source 1", dry_run=dry_run)
+        self.inner_main_m.assert_called_once_with("Source 1", dry_run)
         assert len(caplog.records) == 0
 
     @pytest.mark.asyncio

@@ -9,7 +9,9 @@ from app.repositories.todoist import TodoistRepository
 logger = get_logger(__name__)
 
 
-async def process_scheduled_episodes(episodes: list[ScheduledEpisode], assume_new: bool) -> None:
+async def process_scheduled_episodes(
+    episodes: list[ScheduledEpisode], assume_new: bool, dry_run: bool
+) -> None:
     # We only care about episodes that will be released in the future (excluding today)
     today = date.today()
     if assume_new:
@@ -37,7 +39,8 @@ async def process_scheduled_episodes(episodes: list[ScheduledEpisode], assume_ne
                 section_id=episode.source.inputs.todoist_section_id,
                 due_date=episode.released_date,
             )
-            await todoist_repo.create_task(task_create)
+            if not dry_run:
+                await todoist_repo.create_task(task_create)
             continue
 
         task_update = TaskUpdate()
@@ -53,7 +56,8 @@ async def process_scheduled_episodes(episodes: list[ScheduledEpisode], assume_ne
         if task_update:
             params = task_update.dict(exclude_unset=True)
             logger.info("Updating task for %r with params %r", task_content, params)
-            await todoist_repo.update_task(task.id, task_update)
+            if not dry_run:
+                await todoist_repo.update_task(task.id, task_update)
 
 
 async def get_tasks_from_project_ids(todoist_repo: TodoistRepository, ids: set[str]) -> list[Task]:

@@ -13,7 +13,7 @@ logger = get_logger(__name__)
 
 
 async def process_non_scheduled_episodes(
-    episodes: list[NonScheduledEpisode], assume_new: bool
+    episodes: list[NonScheduledEpisode], assume_new: bool, dry_run: bool
 ) -> None:
     today = date.today()
     source_names = {x.source_name for x in episodes}
@@ -41,21 +41,23 @@ async def process_non_scheduled_episodes(
                 due_date=today,
             )
             new_episodes_source_names.add(episode.source_name)
-            await todoist_repo.create_task(task_create)
-            if not assume_new:
-                await telegram_repo.send_message(f"New episode: {task_content}")
+            if not dry_run:
+                await todoist_repo.create_task(task_create)
+                if not assume_new:
+                    await telegram_repo.send_message(f"New episode: {task_content}")
 
     if not new_episodes_source_names:
         logger.info("No new non scheduled episodes")
         return
 
-    await update_s3_info(s3_repo, new_episodes_source_names, episodes)
+    await update_s3_info(s3_repo, new_episodes_source_names, episodes, dry_run)
 
 
 async def update_s3_info(
     s3_repo: S3Repository,
     new_episodes_source_names: set[str],
     episodes: list[NonScheduledEpisode],
+    dry_run: bool,
 ) -> None:
     tasks = []
     for source_name, source_episodes_iter in groupby(episodes, key=lambda x: x.source_name):
@@ -66,8 +68,11 @@ async def update_s3_info(
         logger.info("Updating %r episodes in s3", source_name)
         source_episodes = list(source_episodes_iter)
         episode_ids = [x.chapter_id for x in source_episodes]
-        tasks.append(s3_repo.update_episodes(source_name, episode_ids))
+        if not dry_run:
+            tasks.append(s3_repo.update_episodes(source_name, episode_ids))
 
+    if dry_run:
+        return
     await asyncio.gather(*tasks)
 
 

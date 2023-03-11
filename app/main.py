@@ -35,12 +35,12 @@ def filter_sources(sources: list[Source], entire_source: str) -> list[Source]:
     filtered_sources = [x for x in sources if x.inputs.source_name == entire_source]
     if not filtered_sources:
         source_names = ", ".join(repr(x.inputs.source_name) for x in sources)
-        msg = f"Invalid source name: {entire_source}. Valid names are: {source_names}"
+        msg = f"Invalid source name: {entire_source!r}. Valid names are: {source_names}"
         raise ClickException(msg)
     return filtered_sources
 
 
-async def _main(entire_source: str | None) -> None:
+async def _main(entire_source: str | None, dry_run: bool) -> None:
     sources = get_sources()
     if entire_source is not None:
         sources = filter_sources(sources, entire_source)
@@ -56,13 +56,13 @@ async def _main(entire_source: str | None) -> None:
     logger.info("Found %d scheduled episodes", len(scheduled_eps))
     logger.info("Found %d non-scheduled episodes", len(non_scheduled_eps))
 
-    await process_scheduled_episodes(scheduled_eps, assume_new=assume_new)
-    await process_non_scheduled_episodes(non_scheduled_eps, assume_new=assume_new)
+    await process_scheduled_episodes(scheduled_eps, assume_new=assume_new, dry_run=dry_run)
+    await process_non_scheduled_episodes(non_scheduled_eps, assume_new=assume_new, dry_run=dry_run)
 
 
-async def main(entire_source: str | None = None) -> None:
+async def main(*, entire_source: str | None = None, dry_run: bool = False) -> None:
     try:
-        await _main(entire_source)
+        await _main(entire_source, dry_run)
     except Exception as e:
         if not isinstance(e, ClickException):
             logger.exception("Internal error", stack_info=True)

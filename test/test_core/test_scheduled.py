@@ -20,13 +20,14 @@ EPISODE_LIST = [ScheduledEpisode(**x) for x in loads(EPISODES_FILE.read_text())]
 @pytest.mark.asyncio
 @freeze_time("2018-01-01")
 @pytest.mark.parametrize("assume_new", [True, False])
+@pytest.mark.parametrize("dry_run", [True, False])
 @mock.patch("app.core.scheduled.TodoistRepository")
-async def test_process_scheduled_episodes(todoist_repo_mock, assume_new):
+async def test_process_scheduled_episodes(todoist_repo_mock, assume_new, dry_run):
     repo_mock = mock.AsyncMock()
     todoist_repo_mock.return_value = repo_mock
     repo_mock.list_tasks.return_value = TASK_LIST
 
-    await process_scheduled_episodes(EPISODE_LIST, assume_new)
+    await process_scheduled_episodes(EPISODE_LIST, assume_new, dry_run)
 
     todoist_repo_mock.assert_called_once()
     repo = todoist_repo_mock.return_value
@@ -41,7 +42,9 @@ async def test_process_scheduled_episodes(todoist_repo_mock, assume_new):
         section_id=None,
         due_date=date(2019, 1, 1),
     )
-    if assume_new:
+    if dry_run:
+        repo.create_task.assert_not_called()
+    elif assume_new:
         assert repo.create_task.call_count == 2
     else:
         repo.create_task.assert_called_once_with(task_create)
@@ -51,4 +54,7 @@ async def test_process_scheduled_episodes(todoist_repo_mock, assume_new):
         due_date=date(2019, 1, 7),
         section_id="section-1",
     )
-    repo.update_task.assert_called_once_with("task-2", task_update)
+    if dry_run:
+        repo.update_task.assert_not_called()
+    else:
+        repo.update_task.assert_called_once_with("task-2", task_update)
