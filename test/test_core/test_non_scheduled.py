@@ -47,9 +47,10 @@ class TestProcessNonScheduledEpisodes:
         self.s3r_sm.stop()
 
     @pytest.mark.parametrize("assume_new", [True, False])
+    @pytest.mark.parametrize("dry_run", [True, False])
     @pytest.mark.asyncio
-    async def test_ok(self, assume_new):
-        await process_non_scheduled_episodes(EPISODE_LIST, assume_new)
+    async def test_ok(self, assume_new, dry_run):
+        await process_non_scheduled_episodes(EPISODE_LIST, assume_new, dry_run)
 
         self.todoist_m.assert_called_once()
         assert self.todoist_m.return_value.list_tasks.call_count == 0
@@ -61,7 +62,12 @@ class TestProcessNonScheduledEpisodes:
             section_id="section-3",
             due_date=date(2022, 1, 1),
         )
-        if assume_new:
+        if dry_run:
+            self.todoist_m.return_value.create_task.assert_not_called()
+            self.todoist_m.return_value.update_task.assert_not_called()
+            self.telegram_m.return_value.send_message.assert_not_called()
+            self.s3_repo_m.return_value.update_episodes.assert_not_called()
+        elif assume_new:
             assert self.todoist_m.return_value.create_task.call_count == 3
             self.todoist_m.return_value.update_task.assert_not_called()
             self.telegram_m.return_value.send_message.assert_not_called()
@@ -79,11 +85,12 @@ class TestProcessNonScheduledEpisodes:
             )
 
     @pytest.mark.parametrize("assume_new", [True, False])
+    @pytest.mark.parametrize("dry_run", [True, False])
     @pytest.mark.asyncio
-    async def test_no_new_episodes(self, assume_new):
+    async def test_no_new_episodes(self, assume_new, dry_run):
         self.s3_repo_m.return_value.get_episodes.return_value = []
 
-        await process_non_scheduled_episodes([], assume_new)
+        await process_non_scheduled_episodes([], assume_new, dry_run)
 
         self.todoist_m.assert_called_once()
         assert self.todoist_m.return_value.list_tasks.call_count == 0
