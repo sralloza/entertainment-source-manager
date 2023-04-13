@@ -1,10 +1,16 @@
+import re
+
 from bs4 import BeautifulSoup, Tag
+from click import ClickException
 from dateutil.parser import parse as parse_date
 
 from app.core.common import BaseRepository
+from app.logs import get_logger
 from app.models.episodes import ScheduledEpisode
 from app.models.inputs import TheTVDBInputs
 from app.models.source import Source
+
+logger = get_logger(__name__)
 
 
 class TheTVDBProvider(BaseRepository):
@@ -13,9 +19,30 @@ class TheTVDBProvider(BaseRepository):
 
     async def process_source(self, source: Source) -> list[ScheduledEpisode]:
         inputs: TheTVDBInputs = source.inputs  # type: ignore
+        soup0 = await self._send_request_soup("GET", f"/{inputs.source_encoded_name}")
+        self._log_finished_series(soup0, inputs.source_name)
+
         path = f"/{inputs.source_encoded_name}/allseasons/official"
-        soup = await self._send_request_soup("GET", path)
-        return self._parse_episodes(soup, inputs, source)
+        soup1 = await self._send_request_soup("GET", path)
+        return self._parse_episodes(soup1, inputs, source)
+
+    def _log_finished_series(self, soup: BeautifulSoup, source_name: str) -> None:
+        series_basic_info = self._get_series_basic_info_map(soup)
+        if series_basic_info.get("Status") == "Ended":
+            logger.warning("Series %s has ended", source_name)
+
+    @staticmethod
+    def _get_series_basic_info_map(soup: BeautifulSoup) -> dict[str, str]:
+        container = soup.find("div", id="series_basic_info")
+        if not container:
+            raise ClickException("Could not find series basic info")
+        output: dict[str, str] = {}
+        for group in container.find_all("li"):  # type: ignore
+            title = group.find("strong").text
+            content = "".join([x.text.strip() for x in group.find_all("span")])
+            content = re.sub(r"[\s\n]+", " ", content)
+            output[title] = content
+        return output
 
     def _parse_episodes(
         self, doc: BeautifulSoup, inputs: TheTVDBInputs, source: Source

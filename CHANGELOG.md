@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- feat: add log to warn when a `TheTVDB` source is marked as `Ended`
+
 ## [1.1.0] - 2023-03-11
 
 ### Added
