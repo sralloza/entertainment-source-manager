@@ -1,3 +1,4 @@
+import re
 from json import loads
 from pathlib import Path
 
@@ -15,6 +16,10 @@ params = pytest.mark.parametrize(
     "name,encoded_name",
     [("Sherlock", "sherlock"), ("The Last of Us", "the-last-of-us")],
 )
+is_ended_map = {
+    "Sherlock": True,
+    "The Last of Us": False,
+}
 
 
 def get_source(name: str, encoded_name: str):
@@ -31,9 +36,14 @@ def get_source(name: str, encoded_name: str):
 
 @pytest.mark.asyncio
 @params
-async def test_thetvdb(httpx_mock: HTTPXMock, name: str, encoded_name: str):
+async def test_thetvdb(httpx_mock: HTTPXMock, name: str, encoded_name: str, caplog):
     httpx_mock.add_response(
-        content=DATA_FILES_PATH.joinpath(f"{encoded_name}/inputs.html").read_bytes()
+        url=re.compile(f".+/series/{encoded_name}/allseasons/official"),
+        content=(DATA_FILES_PATH / f"{encoded_name}/inputs.html").read_bytes(),
+    )
+    httpx_mock.add_response(
+        url=re.compile(f".+/series/{encoded_name}"),
+        content=(DATA_FILES_PATH / f"{encoded_name}/info.html").read_bytes(),
     )
     source = get_source(name, encoded_name)
     result = await TheTVDBProvider().process_source(source=source)
@@ -47,10 +57,28 @@ async def test_thetvdb(httpx_mock: HTTPXMock, name: str, encoded_name: str):
         exp["source"] = source.dict()
         assert exp == res.dict()
 
+    # Series ended log check
+    if not is_ended_map[name]:
+        assert len(caplog.records) == 0
+        return
+
+    assert len(caplog.records) == 1
+    record = caplog.records[0]
+    assert record.levelname == "WARNING"
+    assert record.message == f"Series {name} has ended"
+
 
 @pytest.mark.asyncio
 @params
-async def test_thetvdb_fail(httpx_mock: HTTPXMock, name: str, encoded_name: str):
+async def test_thetvdb_fail_processing(httpx_mock: HTTPXMock, name: str, encoded_name: str):
+    httpx_mock.add_response(content=b"<html></html>", status_code=200)
+    with pytest.raises(ClickException, match="Could not find series basic info"):
+        await TheTVDBProvider().process_source(source=get_source(name, encoded_name))
+
+
+@pytest.mark.asyncio
+@params
+async def test_thetvdb_fail_request(httpx_mock: HTTPXMock, name: str, encoded_name: str):
     httpx_mock.add_response(content=b'{"message": "Forbidden"}', status_code=403)
     with pytest.raises(ClickException, match="Error while fetching .*: 403 .*"):
         await TheTVDBProvider().process_source(source=get_source(name, encoded_name))
