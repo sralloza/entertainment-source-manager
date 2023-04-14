@@ -1,16 +1,18 @@
 import asyncio
+from logging import getLogger
 
 from click import ClickException
 
 from app.core.non_scheduled import process_non_scheduled_episodes
 from app.core.scheduled import process_scheduled_episodes
-from app.logs import get_logger
+from app.logs import setup_logging
 from app.models.episodes import NonScheduledEpisode, ScheduledEpisode
 from app.models.source import Source
 from app.providers import _LNS, _LS, process_source
 from app.settings import get_sources, settings
 
-logger = get_logger(__name__)
+setup_logging()
+logger = getLogger(__name__)
 
 
 async def _get_episodes_from_source(source: Source, disable_filter: bool) -> _LS | _LNS:

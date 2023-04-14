@@ -1,12 +1,12 @@
 import asyncio
 from datetime import date
+from logging import getLogger
 
-from app.logs import get_logger
 from app.models.episodes import ScheduledEpisode
 from app.models.todoist import Task, TaskCreate, TaskUpdate
 from app.repositories.todoist import TodoistRepository
 
-logger = get_logger(__name__)
+logger = getLogger(__name__)
 
 
 async def process_scheduled_episodes(
@@ -31,13 +31,17 @@ async def process_scheduled_episodes(
         task_description = f"Released: {episode.released_date} on {episode.platform}"
 
         if not task:
-            logger.info("Creating task for %r", task_content)
             task_create = TaskCreate(
                 content=task_content,
                 description=task_description,
                 project_id=episode.source.inputs.todoist_project_id,
                 section_id=episode.source.inputs.todoist_section_id,
                 due_date=episode.released_date,
+            )
+            logger.info(
+                "Creating task for %r",
+                task_content,
+                extra={"task_create": task_create.dict(), "op": "create_task", "type": "scheduled"},
             )
             if not dry_run:
                 await todoist_repo.create_task(task_create)
@@ -55,7 +59,11 @@ async def process_scheduled_episodes(
 
         if task_update:
             params = task_update.dict(exclude_unset=True)
-            logger.info("Updating task for %r with params %r", task_content, params)
+            logger.info(
+                "Updating task for %r",
+                task_content,
+                extra={"params_update": params, "op": "update_task", "type": "scheduled"},
+            )
             if not dry_run:
                 await todoist_repo.update_task(task.id, task_update)
 

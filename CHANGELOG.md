@@ -6,6 +6,10 @@
 
 - feat: add log to warn when a `TheTVDB` source is marked as `Ended`
 
+### Changed
+
+- chore: improve json logs using python-json-logger library
+
 ## [1.1.0] - 2023-03-11
 
 ### Added

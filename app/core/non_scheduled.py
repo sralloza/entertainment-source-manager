@@ -1,15 +1,15 @@
 import asyncio
 from datetime import date
 from itertools import groupby
+from logging import getLogger
 
-from app.logs import get_logger
 from app.models.episodes import NonScheduledEpisode, S3NonScheduledEpisode
 from app.models.todoist import TaskCreate
 from app.repositories.s3 import S3Repository
 from app.repositories.telegram import TelegramRepository
 from app.repositories.todoist import TodoistRepository
 
-logger = get_logger(__name__)
+logger = getLogger(__name__)
 
 
 async def process_non_scheduled_episodes(
@@ -31,7 +31,6 @@ async def process_non_scheduled_episodes(
         s3_episode = s3_episodes_map.get(task_title)
 
         if not s3_episode or assume_new:
-            logger.info("Creating task and notification for %r (forced=%r)", task_title, assume_new)
             task_content = f"[{task_title}]({episode.chapter_url})"
             task_create = TaskCreate(
                 content=task_content,
@@ -39,6 +38,16 @@ async def process_non_scheduled_episodes(
                 project_id=episode.source.inputs.todoist_project_id,
                 section_id=episode.source.inputs.todoist_section_id,
                 due_date=today,
+            )
+            logger.info(
+                "Creating task and notification for %r (forced=%r)",
+                task_title,
+                assume_new,
+                extra={
+                    "task_create": task_create.dict(),
+                    "op": "create_task",
+                    "type": "non_scheduled",
+                },
             )
             new_episodes_source_names.add(episode.source_name)
             if not dry_run:
@@ -62,10 +71,12 @@ async def update_s3_info(
     tasks = []
     for source_name, source_episodes_iter in groupby(episodes, key=lambda x: x.source_name):
         if source_name not in new_episodes_source_names:
-            logger.debug("Skipping %r because it has no new episodes", source_name)
+            logger.debug(
+                "Skipping %r AWS S3 file update because it has no new episodes", source_name
+            )
             continue
 
-        logger.info("Updating %r episodes in s3", source_name)
+        logger.info("Updating %r episodes in AWS S3", source_name)
         source_episodes = list(source_episodes_iter)
         episode_ids = [x.chapter_id for x in source_episodes]
         if not dry_run:

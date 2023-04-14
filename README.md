@@ -66,9 +66,9 @@ The application is designed to be executed by a scheduler (e.g. cron) and it wil
 Example:
 
 ```text
-{"timestamp": "2023-03-10 21:11:32,775", "level": "DEBUG", "message": "Found 6 episodes for Star Wars: Tales of the Jedi", "version": "1.0.0", "thread": "MainThread"}
-{"timestamp": "2023-03-10 21:11:32,796", "level": "DEBUG", "message": "Found 18 episodes for Inside Job", "version": "1.0.0", "thread": "MainThread"}
-{"timestamp": "2023-03-10 21:11:32,803", "level": "DEBUG", "message": "Found 9 episodes for Marvel's What If", "version": "1.0.0", "thread": "MainThread"}
+{"timestamp": "2023-04-13T22:52:33.298Z", "lvl": "DEBUG", "logger": "app.main", "message": "Found 6 episodes for Star Wars: Tales of the Jedi", "thread": "MainThread", "version": "1.2.0"}
+{"timestamp": "2023-04-13T22:52:33.317Z", "lvl": "DEBUG", "logger": "app.main", "message": "Found 18 episodes for Inside Job", "thread": "MainThread", "version": "1.2.0"}
+{"timestamp": "2023-04-13T22:52:33.340Z", "lvl": "DEBUG", "logger": "app.main", "message": "Found 9 episodes for Marvel's What If", "thread": "MainThread", "version": "1.2.0"}
 ```
 
 Note: the `version` field is the application version.

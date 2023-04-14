@@ -65,7 +65,7 @@ async def test_thetvdb(httpx_mock: HTTPXMock, name: str, encoded_name: str, capl
     assert len(caplog.records) == 1
     record = caplog.records[0]
     assert record.levelname == "WARNING"
-    assert record.message == f"Series {name} has ended"
+    assert record.message == f"Series {name!r} has ended"
 
 
 @pytest.mark.asyncio
