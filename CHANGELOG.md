@@ -14,6 +14,7 @@
 
 - fix: update spyxfamily provider to use the new website
 - fix: escape special telegram characters for markdown v2
+- fix: ignore 404 S3 errors when reading unscheduled source lists
 
 ## [1.1.0] - 2023-03-11
 
