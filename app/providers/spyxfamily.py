@@ -9,7 +9,7 @@ from app.models.source import Source
 
 class SpyXFamilyProvider(BaseRepository):
     def __init__(self) -> None:
-        super().__init__("https://spy.spyxmanga.com")
+        super().__init__("https://w12.spyxmanga.com/")
 
     async def process_source(self, source: Source) -> list[NonScheduledEpisode]:
         doc = await self._send_request_soup("GET", "/")
