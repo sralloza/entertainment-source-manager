@@ -3,6 +3,7 @@ from app.settings import settings
 
 SPECIAL_TG_CHARS = ".-"
 
+
 class TelegramRepository(BaseRepository):
     def __init__(self) -> None:
         super().__init__(api_base_url="https://api.telegram.org")
