@@ -1,7 +1,6 @@
 from datetime import date
 from json import loads
 from pathlib import Path
-from test.test_providers import check_invalid_request_log
 from unittest import mock
 
 import pytest
@@ -11,6 +10,7 @@ from pytest_httpx import HTTPXMock
 from app.models.settings import Settings
 from app.models.todoist import Task, TaskCreate, TaskUpdate
 from app.repositories.todoist import TodoistRepository
+from test.test_providers import check_invalid_request_log
 
 TEST_DATA_PATH = Path(__file__).parent.parent / "data" / "todoist"
 

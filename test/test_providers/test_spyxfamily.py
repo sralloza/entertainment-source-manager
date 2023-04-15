@@ -1,7 +1,6 @@
 import json
 from json import loads
 from pathlib import Path
-from test.test_providers import check_invalid_request_log
 from typing import Any
 
 import pytest
@@ -11,6 +10,7 @@ from pytest_httpx._httpx_mock import HTTPXMock
 from app.models.inputs import SpyXFamilyInputs
 from app.models.source import Source
 from app.providers.spyxfamily import SpyXFamilyProvider
+from test.test_providers import check_invalid_request_log
 
 DATA_FILES_PATH = Path(__file__).parent.parent / "data" / "spyxfamily"
 SOURCE = Source(

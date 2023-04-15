@@ -1,7 +1,6 @@
 import re
 from json import loads
 from pathlib import Path
-from test.test_providers import check_invalid_request_log
 
 import pytest
 from click import ClickException
@@ -11,6 +10,7 @@ from pytest_httpx._httpx_mock import HTTPXMock
 from app.models.inputs import TheTVDBInputs
 from app.models.source import Source
 from app.providers.thetvdb import TheTVDBProvider
+from test.test_providers import check_invalid_request_log
 
 DATA_FILES_PATH = Path(__file__).parent.parent / "data" / "thetvdb"
 params = pytest.mark.parametrize(

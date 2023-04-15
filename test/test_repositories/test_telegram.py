@@ -1,4 +1,3 @@
-from test.test_providers import check_invalid_request_log
 from unittest import mock
 
 import pytest
@@ -7,6 +6,7 @@ from furl import furl
 from pytest_httpx import HTTPXMock
 
 from app.repositories.telegram import TelegramRepository
+from test.test_providers import check_invalid_request_log
 
 
 @pytest.mark.parametrize("tg_enabled", [True, False])

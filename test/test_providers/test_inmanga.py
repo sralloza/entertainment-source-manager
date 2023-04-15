@@ -1,6 +1,5 @@
 from json import loads
 from pathlib import Path
-from test.test_providers import check_invalid_request_log
 from uuid import UUID
 
 import pytest
@@ -10,6 +9,7 @@ from pytest_httpx._httpx_mock import HTTPXMock
 from app.models.inputs import InMangaInputs
 from app.models.source import Source
 from app.providers.inmanga import InMangaProvider
+from test.test_providers import check_invalid_request_log
 
 DATA_FILES_PATH = Path(__file__).parent.parent / "data" / "inmanga"
 SOURCE = Source(
