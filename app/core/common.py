@@ -1,3 +1,4 @@
+import logging
 from copy import deepcopy
 from datetime import date
 from typing import Any
@@ -9,6 +10,7 @@ from httpx import AsyncClient, Response
 from app.utils.misc import get_version
 
 _DCT = dict[str, Any] | None
+logger = logging.getLogger(__name__)
 
 
 class BaseRepository:
@@ -29,6 +31,22 @@ class BaseRepository:
         async with AsyncClient(timeout=10, follow_redirects=True, headers=headers) as client:
             response = await client.request(method, url, json=data, params=params)
             if response.status_code >= 400:
+                logger.error(
+                    "Error sending HTTP request",
+                    extra={
+                        "request": {
+                            "method": method,
+                            "url": url,
+                            "data": data,
+                            "params": params,
+                        },
+                        "response": {
+                            "status_code": response.status_code,
+                            "response_body": response.text,
+                            "response_headers": response.headers,
+                        },
+                    },
+                )
                 raise ClickException(
                     f"Error while fetching {url}: {response.status_code} {response.text}"
                 )

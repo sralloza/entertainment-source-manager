@@ -9,6 +9,7 @@ from pytest_httpx._httpx_mock import HTTPXMock
 from app.models.inputs import InMangaInputs
 from app.models.source import Source
 from app.providers.inmanga import InMangaProvider
+from test.test_providers import check_invalid_request_log
 
 DATA_FILES_PATH = Path(__file__).parent.parent / "data" / "inmanga"
 SOURCE = Source(
@@ -54,7 +55,8 @@ async def test_inmanga(httpx_mock: HTTPXMock):
 
 
 @pytest.mark.asyncio
-async def test_inmanga_fail(httpx_mock: HTTPXMock):
+async def test_inmanga_fail(httpx_mock: HTTPXMock, caplog):
     httpx_mock.add_response(content=b'{"message": "Forbidden"}', status_code=403)
     with pytest.raises(ClickException, match="Error while fetching .*: 403 .*"):
         await InMangaProvider().process_source(source=SOURCE)
+    check_invalid_request_log(caplog)

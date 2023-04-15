@@ -10,6 +10,10 @@
 
 - chore: improve json logs using python-json-logger library
 
+### Fixed
+
+- fix: update spyxfamily provider to use the new website
+
 ## [1.1.0] - 2023-03-11
 
 ### Added

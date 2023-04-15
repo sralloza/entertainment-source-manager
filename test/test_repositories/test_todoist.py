@@ -10,6 +10,7 @@ from pytest_httpx import HTTPXMock
 from app.models.settings import Settings
 from app.models.todoist import Task, TaskCreate, TaskUpdate
 from app.repositories.todoist import TodoistRepository
+from test.test_providers import check_invalid_request_log
 
 TEST_DATA_PATH = Path(__file__).parent.parent / "data" / "todoist"
 
@@ -59,7 +60,7 @@ async def test_create_task_ok(httpx_mock: HTTPXMock):
 
 
 @pytest.mark.asyncio
-async def test_create_task_fail(httpx_mock: HTTPXMock):
+async def test_create_task_fail(httpx_mock: HTTPXMock, caplog):
     httpx_mock.add_response(400, text='{"error": "Bad Request"}')
 
     repo = TodoistRepository()
@@ -72,6 +73,7 @@ async def test_create_task_fail(httpx_mock: HTTPXMock):
     msg = "Error while fetching .+: 400 .+Bad Request"
     with pytest.raises(ClickException, match=msg):
         await repo.create_task(task_create)
+    check_invalid_request_log(caplog)
 
 
 @pytest.mark.asyncio
@@ -113,7 +115,7 @@ async def test_list_tasks_ok(httpx_mock: HTTPXMock):
 
 
 @pytest.mark.asyncio
-async def test_list_tasks_fail(httpx_mock: HTTPXMock):
+async def test_list_tasks_fail(httpx_mock: HTTPXMock, caplog):
     httpx_mock.add_response(400, text='{"error": "Bad Request"}')
 
     repo = TodoistRepository()
@@ -126,6 +128,7 @@ async def test_list_tasks_fail(httpx_mock: HTTPXMock):
     msg = "Error while fetching .+: 400 .+Bad Request"
     with pytest.raises(ClickException, match=msg):
         await repo.create_task(task_create)
+    check_invalid_request_log(caplog)
 
 
 @pytest.mark.asyncio
@@ -162,7 +165,7 @@ async def test_update_task_ok(httpx_mock: HTTPXMock):
 
 
 @pytest.mark.asyncio
-async def test_update_task_fail(httpx_mock: HTTPXMock):
+async def test_update_task_fail(httpx_mock: HTTPXMock, caplog):
     httpx_mock.add_response(400, text='{"error": "Bad Request"}')
 
     repo = TodoistRepository()
@@ -175,3 +178,4 @@ async def test_update_task_fail(httpx_mock: HTTPXMock):
     msg = "Error while fetching .+: 400 .+Bad Request"
     with pytest.raises(ClickException, match=msg):
         await repo.update_task("task_id", task_update)
+    check_invalid_request_log(caplog)

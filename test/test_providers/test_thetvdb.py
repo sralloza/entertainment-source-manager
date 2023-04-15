@@ -10,6 +10,7 @@ from pytest_httpx._httpx_mock import HTTPXMock
 from app.models.inputs import TheTVDBInputs
 from app.models.source import Source
 from app.providers.thetvdb import TheTVDBProvider
+from test.test_providers import check_invalid_request_log
 
 DATA_FILES_PATH = Path(__file__).parent.parent / "data" / "thetvdb"
 params = pytest.mark.parametrize(
@@ -78,7 +79,8 @@ async def test_thetvdb_fail_processing(httpx_mock: HTTPXMock, name: str, encoded
 
 @pytest.mark.asyncio
 @params
-async def test_thetvdb_fail_request(httpx_mock: HTTPXMock, name: str, encoded_name: str):
+async def test_thetvdb_fail_request(httpx_mock: HTTPXMock, caplog, name: str, encoded_name: str):
     httpx_mock.add_response(content=b'{"message": "Forbidden"}', status_code=403)
     with pytest.raises(ClickException, match="Error while fetching .*: 403 .*"):
         await TheTVDBProvider().process_source(source=get_source(name, encoded_name))
+    check_invalid_request_log(caplog)

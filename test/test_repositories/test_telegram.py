@@ -6,6 +6,7 @@ from furl import furl
 from pytest_httpx import HTTPXMock
 
 from app.repositories.telegram import TelegramRepository
+from test.test_providers import check_invalid_request_log
 
 
 @pytest.mark.parametrize("tg_enabled", [True, False])
@@ -42,7 +43,8 @@ async def test_send_message(settings_mock, httpx_mock: HTTPXMock, tg_enabled: bo
 
 
 @pytest.mark.asyncio
-async def test_send_message_fail(httpx_mock: HTTPXMock):
+async def test_send_message_fail(httpx_mock: HTTPXMock, caplog):
     httpx_mock.add_response(content=b'{"message": "Forbidden"}', status_code=403)
     with pytest.raises(ClickException, match="Error while fetching .*: 403 .*"):
         await TelegramRepository().send_message("message")
+    check_invalid_request_log(caplog)
