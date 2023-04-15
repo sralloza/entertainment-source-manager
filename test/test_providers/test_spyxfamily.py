@@ -1,6 +1,7 @@
 import json
 from json import loads
 from pathlib import Path
+from test.test_providers import check_invalid_request_log
 from typing import Any
 
 import pytest
@@ -47,10 +48,8 @@ async def test_spyxfamily(httpx_mock: HTTPXMock):
 
 
 @pytest.mark.asyncio
-async def test_spyxfamily_fail(httpx_mock: HTTPXMock):
+async def test_spyxfamily_fail(httpx_mock: HTTPXMock, caplog):
     httpx_mock.add_response(content=b'{"message": "Forbidden"}', status_code=403)
     with pytest.raises(ClickException, match="Error while fetching .*: 403 .*"):
         await SpyXFamilyProvider().process_source(source=SOURCE)
-import icecream
-icecream.install()
-icecream.ic.configureOutput(includeContext=True)
+    check_invalid_request_log(caplog)
