@@ -16,7 +16,7 @@ logger = getLogger(__name__)
 
 async def _get_episodes_from_source(source: Source, disable_filter: bool) -> _LS | _LNS:
     if not disable_filter and source.inputs.source_name in settings.disabled_sources:
-        logger.info("Source %s is disabled", source.inputs.source_name)
+        logger.info("Source %r is disabled", source.inputs.source_name)
         return []  # type: ignore[return-value]
     result = await process_source(source)
     logger.debug("Found %d episodes for %s", len(result), source.inputs.source_name)
