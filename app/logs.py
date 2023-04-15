@@ -10,7 +10,6 @@ from app.utils.misc import get_version
 
 logger = logging.getLogger(__name__)
 LOG_FMT = "%(timestamp)s %(lvl)s %(logger)s %(message)s %(thread)s %(version)s %(stack_trace)s"
-_D = dict[str, Any]
 
 
 class JsonFormatter(jsonlogger.JsonFormatter):
@@ -36,7 +35,7 @@ class JsonFormatter(jsonlogger.JsonFormatter):
                 del log_record[field]
 
 
-def setup_logging() -> None:
+def setup_logging() -> None:  # pragma: no cover
     logging_config: dict[str, Any] = {
         "version": 1,
         "loggers": {
@@ -70,10 +69,6 @@ def setup_logging() -> None:
         },
     }
 
-    # disabled_loggers = ()
-    # for logger in disabled_loggers:
-    #     logging_config["loggers"][logger] = {"level": "ERROR", "propagate": False}
-
     logging.config.dictConfig(logging_config)
 
 
@@ -83,7 +78,7 @@ def setup_logging() -> None:
 def _get_logger_for_testing(name: str) -> logging.Logger:
     _logger = logging.getLogger(name)
     normal_handler = logging.StreamHandler(sys.stdout)
-    normal_handler.setFormatter(JsonFormatter(LOG_FMT))
+    normal_handler.setFormatter(JsonFormatter(LOG_FMT))  # type: ignore[no-untyped-call]
     normal_handler.setLevel(logging.DEBUG)
     _logger.addHandler(normal_handler)
     return _logger
