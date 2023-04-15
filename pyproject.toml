@@ -51,7 +51,7 @@ line-length = 100
 select = ["F", "E", "W", "I", "N", "ARG"]
 
 [tool.ruff.isort]
-known-local-folder = ["app", "test"]
+known-first-party = ["app", "test"]
 
 [tool.ruff.pep8-naming]
 # Allow Pydantic's `@validator` and `@root_validator` decorators to trigger class method treatment.
