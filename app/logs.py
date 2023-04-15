@@ -1,7 +1,7 @@
 import logging
 import logging.config
 from datetime import datetime
-from typing import Any
+from typing import Any, Callable
 
 from pythonjsonlogger import jsonlogger
 
@@ -9,6 +9,7 @@ from app.utils.misc import get_version
 
 logger = logging.getLogger(__name__)
 LOG_FMT = "%(timestamp)s %(lvl)s %(logger)s %(message)s %(thread)s %(version)s %(stack_trace)s"
+_D = dict[str, Any]
 
 
 class JsonFormatter(jsonlogger.JsonFormatter):
@@ -18,11 +19,10 @@ class JsonFormatter(jsonlogger.JsonFormatter):
         super().add_fields(log_record, record, message_dict)
         if "exc_info" in log_record:
             exc_info = log_record["exc_info"]
-            del log_record["stack_info"]
             log_record["stack_trace"] = exc_info
 
         timestamp = datetime.fromtimestamp(record.created)
-        log_record["timestamp"] = timestamp.isoformat(timespec="milliseconds") + "Z"
+        log_record["timestamp"] = timestamp.isoformat(timespec="milliseconds")
 
         log_record["lvl"] = record.levelname.upper()
         log_record["logger"] = record.name
@@ -35,7 +35,7 @@ class JsonFormatter(jsonlogger.JsonFormatter):
                 del log_record[field]
 
 
-def setup_logging() -> None:
+def setup_logging(dict_modifier: Callable[[_D], _D] | None = None) -> None:
     logging_config: dict[str, Any] = {
         "version": 1,
         "loggers": {
@@ -68,6 +68,8 @@ def setup_logging() -> None:
             }
         },
     }
+    if dict_modifier:
+        logging_config = dict_modifier(logging_config)
 
     # disabled_loggers = ()
     # for logger in disabled_loggers:

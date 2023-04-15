@@ -7,20 +7,21 @@ from dateutil.parser import parse
 from app.utils.misc import get_version
 
 
-def test_log_ok(caplog, capsys):
+# It fails when using capsys instead of capfd
+def test_log_ok(caplog, capfd):
     logger = getLogger("test")
     logger.info("something")
 
     assert len(caplog.records) == 1
 
-    record = loads(capsys.readouterr().out)
+    record = loads(capfd.readouterr().out)
     assert "timestamp" in record
     timestamp = record["timestamp"]
     timestamp = parse(timestamp)
     assert timestamp - datetime.now() < timedelta(seconds=1)
     assert "logger" in record
-    assert "level" in record
-    assert record["level"] == "INFO"
+    assert "lvl" in record
+    assert record["lvl"] == "INFO"
     assert "message" in record
     assert record["message"] == "something"
     assert "version" in record
@@ -29,7 +30,8 @@ def test_log_ok(caplog, capsys):
     assert "stack_trace" not in record
 
 
-def test_log_exception(caplog, capsys):
+# It fails when using capsys instead of capfd
+def test_log_exception(caplog, capfd):
     logger = getLogger("test")
 
     try:
@@ -39,13 +41,13 @@ def test_log_exception(caplog, capsys):
 
     assert len(caplog.records) == 1
 
-    record = loads(capsys.readouterr().out)
+    record = loads(capfd.readouterr().out)
     assert "timestamp" in record
     timestamp = record["timestamp"]
     timestamp = parse(timestamp)
     assert timestamp - datetime.now() < timedelta(seconds=1)
-    assert "level" in record
-    assert record["level"] == "ERROR"
+    assert "lvl" in record
+    assert record["lvl"] == "ERROR"
     assert "logger" in record
     assert "message" in record
     assert record["message"] == "something"

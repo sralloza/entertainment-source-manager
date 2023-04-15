@@ -161,18 +161,17 @@ class TestMain:
         assert len(caplog.records) == 0
 
     @pytest.mark.asyncio
-    async def test_exception(self, caplog):
+    async def test_exception(self, capsys):
         self.inner_main_m.side_effect = Exception("test")
         with pytest.raises(ClickException, match="Internal error: test"):
             await main()
 
-        assert len(caplog.records) == 1
-        assert "Internal error" in caplog.text
+        assert "Internal error" in capsys.readouterr().out
 
     @pytest.mark.asyncio
-    async def test_click_exception(self, caplog):
+    async def test_click_exception(self, capsys):
         self.inner_main_m.side_effect = ClickException("this is the original error")
         with pytest.raises(ClickException, match="this is the original error"):
             await main()
 
-        assert len(caplog.records) == 0
+        assert capsys.readouterr().out == ""
