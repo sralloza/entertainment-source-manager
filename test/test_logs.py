@@ -3,12 +3,13 @@ from json import loads
 
 from dateutil.parser import parse
 
-from app.logs import get_logger
+from app.logs import _get_logger_for_testing
 from app.utils.misc import get_version
 
 
 def test_log_ok(caplog, capsys):
-    logger = get_logger("test")
+    caplog.set_level("DEBUG", logger="test")
+    logger = _get_logger_for_testing("test")
     logger.info("something")
 
     assert len(caplog.records) == 1
@@ -18,8 +19,9 @@ def test_log_ok(caplog, capsys):
     timestamp = record["timestamp"]
     timestamp = parse(timestamp)
     assert timestamp - datetime.now() < timedelta(seconds=1)
-    assert "level" in record
-    assert record["level"] == "INFO"
+    assert "logger" in record
+    assert "lvl" in record
+    assert record["lvl"] == "INFO"
     assert "message" in record
     assert record["message"] == "something"
     assert "version" in record
@@ -29,7 +31,8 @@ def test_log_ok(caplog, capsys):
 
 
 def test_log_exception(caplog, capsys):
-    logger = get_logger("test")
+    caplog.set_level("DEBUG", logger="test")
+    logger = _get_logger_for_testing("test")
 
     try:
         raise ValueError("the value error")
@@ -43,8 +46,9 @@ def test_log_exception(caplog, capsys):
     timestamp = record["timestamp"]
     timestamp = parse(timestamp)
     assert timestamp - datetime.now() < timedelta(seconds=1)
-    assert "level" in record
-    assert record["level"] == "ERROR"
+    assert "lvl" in record
+    assert record["lvl"] == "ERROR"
+    assert "logger" in record
     assert "message" in record
     assert record["message"] == "something"
     assert "version" in record

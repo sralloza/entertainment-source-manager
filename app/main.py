@@ -1,21 +1,22 @@
 import asyncio
+from logging import getLogger
 
 from click import ClickException
 
 from app.core.non_scheduled import process_non_scheduled_episodes
 from app.core.scheduled import process_scheduled_episodes
-from app.logs import get_logger
+from app.logs import setup_logging
 from app.models.episodes import NonScheduledEpisode, ScheduledEpisode
 from app.models.source import Source
 from app.providers import _LNS, _LS, process_source
 from app.settings import get_sources, settings
 
-logger = get_logger(__name__)
+logger = getLogger(__name__)
 
 
 async def _get_episodes_from_source(source: Source, disable_filter: bool) -> _LS | _LNS:
     if not disable_filter and source.inputs.source_name in settings.disabled_sources:
-        logger.info("Source %s is disabled", source.inputs.source_name)
+        logger.info("Source %r is disabled", source.inputs.source_name)
         return []  # type: ignore[return-value]
     result = await process_source(source)
     logger.debug("Found %d episodes for %s", len(result), source.inputs.source_name)
@@ -27,7 +28,7 @@ async def get_episodes_from_source(source: Source, disable_filter: bool) -> _LS 
         return await _get_episodes_from_source(source, disable_filter)
     except Exception:
         template = "Error while processing source %r"
-        logger.exception(template, source.inputs.source_name, stack_info=True)
+        logger.exception(template, source.inputs.source_name)
         return []  # type: ignore[return-value]
 
 
@@ -61,10 +62,11 @@ async def _main(entire_source: str | None, dry_run: bool) -> None:
 
 
 async def main(*, entire_source: str | None = None, dry_run: bool = False) -> None:
+    setup_logging()
     try:
         await _main(entire_source, dry_run)
     except Exception as e:
         if not isinstance(e, ClickException):
-            logger.exception("Internal error", stack_info=True)
+            logger.exception("Internal error")
             raise ClickException("Internal error: " + str(e))
         raise

@@ -1,16 +1,16 @@
 import re
+from logging import getLogger
 
 from bs4 import BeautifulSoup, Tag
 from click import ClickException
 from dateutil.parser import parse as parse_date
 
 from app.core.common import BaseRepository
-from app.logs import get_logger
 from app.models.episodes import ScheduledEpisode
 from app.models.inputs import TheTVDBInputs
 from app.models.source import Source
 
-logger = get_logger(__name__)
+logger = getLogger(__name__)
 
 
 class TheTVDBProvider(BaseRepository):
@@ -29,7 +29,7 @@ class TheTVDBProvider(BaseRepository):
     def _log_finished_series(self, soup: BeautifulSoup, source_name: str) -> None:
         series_basic_info = self._get_series_basic_info_map(soup)
         if series_basic_info.get("Status") == "Ended":
-            logger.warning("Series %s has ended", source_name)
+            logger.warning("Series %r has ended", source_name)
 
     @staticmethod
     def _get_series_basic_info_map(soup: BeautifulSoup) -> dict[str, str]:

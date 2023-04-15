@@ -1,12 +1,12 @@
 import asyncio
+from logging import getLogger
 
 import click
 
-from app.logs import get_logger
 from app.main import main
 from app.show import print_source_names, print_sources
 
-logger = get_logger(__name__)
+logger = getLogger(__name__)
 dry_run = click.option(
     "-n",
     "--dry-run",
