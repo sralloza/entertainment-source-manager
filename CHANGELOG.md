@@ -13,6 +13,7 @@
 ### Fixed
 
 - fix: update spyxfamily provider to use the new website
+- fix: escape special telegram characters for markdown v2
 
 ## [1.1.0] - 2023-03-11
 

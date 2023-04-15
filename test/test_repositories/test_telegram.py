@@ -23,7 +23,7 @@ async def test_send_message(settings_mock, httpx_mock: HTTPXMock, tg_enabled: bo
         settings_mock.telegram_chat_id = None
         settings_mock.telegram_enabled = False
 
-    await TelegramRepository().send_message("message")
+    await TelegramRepository().send_message("[test-1.1](url)")
     request = httpx_mock.get_request()
 
     if not tg_enabled:
@@ -36,7 +36,7 @@ async def test_send_message(settings_mock, httpx_mock: HTTPXMock, tg_enabled: bo
     assert url.path == "/bottest/sendMessage"
     assert url.query.params == {
         "chat_id": "chat_id",
-        "text": "message",
+        "text": "[test\\-1\\.1](url)",
         "parse_mode": "MarkdownV2",
         "disable_web_page_preview": "true",
     }
