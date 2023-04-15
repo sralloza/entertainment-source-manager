@@ -1,20 +1,20 @@
 from datetime import datetime, timedelta
 from json import loads
-from logging import getLogger
 
 from dateutil.parser import parse
 
+from app.logs import _get_logger_for_testing
 from app.utils.misc import get_version
 
 
-# It fails when using capsys instead of capfd
-def test_log_ok(caplog, capfd):
-    logger = getLogger("test")
+def test_log_ok(caplog, capsys):
+    caplog.set_level("DEBUG", logger="test")
+    logger = _get_logger_for_testing("test")
     logger.info("something")
 
     assert len(caplog.records) == 1
 
-    record = loads(capfd.readouterr().out)
+    record = loads(capsys.readouterr().out)
     assert "timestamp" in record
     timestamp = record["timestamp"]
     timestamp = parse(timestamp)
@@ -30,9 +30,9 @@ def test_log_ok(caplog, capfd):
     assert "stack_trace" not in record
 
 
-# It fails when using capsys instead of capfd
-def test_log_exception(caplog, capfd):
-    logger = getLogger("test")
+def test_log_exception(caplog, capsys):
+    caplog.set_level("DEBUG", logger="test")
+    logger = _get_logger_for_testing("test")
 
     try:
         raise ValueError("the value error")
@@ -41,7 +41,7 @@ def test_log_exception(caplog, capfd):
 
     assert len(caplog.records) == 1
 
-    record = loads(capfd.readouterr().out)
+    record = loads(capsys.readouterr().out)
     assert "timestamp" in record
     timestamp = record["timestamp"]
     timestamp = parse(timestamp)

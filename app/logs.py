@@ -1,7 +1,8 @@
 import logging
 import logging.config
+import sys
 from datetime import datetime
-from typing import Any, Callable
+from typing import Any
 
 from pythonjsonlogger import jsonlogger
 
@@ -35,7 +36,7 @@ class JsonFormatter(jsonlogger.JsonFormatter):
                 del log_record[field]
 
 
-def setup_logging(dict_modifier: Callable[[_D], _D] | None = None) -> None:
+def setup_logging() -> None:
     logging_config: dict[str, Any] = {
         "version": 1,
         "loggers": {
@@ -68,11 +69,21 @@ def setup_logging(dict_modifier: Callable[[_D], _D] | None = None) -> None:
             }
         },
     }
-    if dict_modifier:
-        logging_config = dict_modifier(logging_config)
 
     # disabled_loggers = ()
     # for logger in disabled_loggers:
     #     logging_config["loggers"][logger] = {"level": "ERROR", "propagate": False}
 
     logging.config.dictConfig(logging_config)
+
+
+# We can't use setup_logging() in tests because it calls logging.config.dictConfig()
+# https://stackoverflow.com/questions/74884842/pytest-caplog-logcapturefixture-is-broken-when-using-logging-config-dictconfig
+# https://github.com/pytest-dev/pytest/issues/10606
+def _get_logger_for_testing(name: str) -> logging.Logger:
+    _logger = logging.getLogger(name)
+    normal_handler = logging.StreamHandler(sys.stdout)
+    normal_handler.setFormatter(JsonFormatter(LOG_FMT))
+    normal_handler.setLevel(logging.DEBUG)
+    _logger.addHandler(normal_handler)
+    return _logger

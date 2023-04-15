@@ -143,7 +143,9 @@ class TestMain:
     @pytest.fixture(autouse=True)
     def mocks(self):
         self.inner_main_sm = mock.patch("app.main._main")
+        self.sl_sm = mock.patch("app.main.setup_logging")
         self.inner_main_m = self.inner_main_sm.start()
+        self.sl_m = self.sl_sm.start()
         yield
         self.inner_main_sm.stop()
 
@@ -161,17 +163,21 @@ class TestMain:
         assert len(caplog.records) == 0
 
     @pytest.mark.asyncio
-    async def test_exception(self, capsys):
+    async def test_exception(self, caplog):
         self.inner_main_m.side_effect = Exception("test")
         with pytest.raises(ClickException, match="Internal error: test"):
             await main()
 
-        assert "Internal error" in capsys.readouterr().out
+        assert len(caplog.records) == 1
+        log_record = caplog.records[0]
+        assert log_record.exc_info[0] == Exception
+        assert log_record.exc_info[1] == self.inner_main_m.side_effect
+        assert log_record.message == "Internal error"
 
     @pytest.mark.asyncio
-    async def test_click_exception(self, capsys):
+    async def test_click_exception(self, caplog):
         self.inner_main_m.side_effect = ClickException("this is the original error")
         with pytest.raises(ClickException, match="this is the original error"):
             await main()
 
-        assert capsys.readouterr().out == ""
+        assert len(caplog.records) == 0
