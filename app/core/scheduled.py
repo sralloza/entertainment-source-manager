@@ -36,7 +36,7 @@ async def process_scheduled_episodes(
                 description=task_description,
                 project_id=episode.source.inputs.todoist_project_id,
                 section_id=episode.source.inputs.todoist_section_id,
-                due_date=episode.released_date,
+                due_date=episode.released_date,  # type: ignore[arg-type]
             )
             logger.info(
                 "Creating task for %r",
