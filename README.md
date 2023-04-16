@@ -69,6 +69,8 @@ Example:
 {"timestamp": "2023-04-13T22:52:33.298Z", "lvl": "DEBUG", "logger": "app.main", "message": "Found 6 episodes for Star Wars: Tales of the Jedi", "thread": "MainThread", "version": "1.2.0"}
 {"timestamp": "2023-04-13T22:52:33.317Z", "lvl": "DEBUG", "logger": "app.main", "message": "Found 18 episodes for Inside Job", "thread": "MainThread", "version": "1.2.0"}
 {"timestamp": "2023-04-13T22:52:33.340Z", "lvl": "DEBUG", "logger": "app.main", "message": "Found 9 episodes for Marvel's What If", "thread": "MainThread", "version": "1.2.0"}
+{"timestamp": "2023-04-13T22:52:33.674", "lvl": "INFO", "logger": "app.core.scheduled", "message": "Updating task for 'The Mandalorian 3x08'", "thread": "MainThread", "version": "1.2.0", "params_update": {"description": "Released: 2023-04-19 on Disney+"}, "op": "update_task", "type": "scheduled"}
+{"timestamp": "2023-04-13T22:52:33.989", "lvl": "INFO", "logger": "app.core.scheduled", "message": "Creating task for 'Secret Invation 1x01'", "thread": "MainThread", "version": "1.2.0", "task_create": {"content": "Secret Invation 1x01", "description": "Released: 2023-06-21 on Disney+", "project_id": "[redacted]", "section_id": "[redacted]", "due_date": "2023-06-21"}, "op": "create_task", "type": "scheduled"}
 ```
 
 Note: the `version` field is the application version.

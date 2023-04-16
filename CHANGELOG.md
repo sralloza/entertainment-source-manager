@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [Unreleased]
+## [1.2.0] - 2023-04-16
 
 ### Added
 
@@ -12,7 +12,7 @@
 
 ### Fixed
 
-- fix: update spyxfamily provider to use the new website
+- fix: update `spyxfamily` provider to use the new website
 - fix: escape special telegram characters for markdown v2
 - fix: ignore 404 S3 errors when reading unscheduled source lists
 
